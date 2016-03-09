@@ -61,7 +61,8 @@ Router.prototype.playRequest = function (req, res) {
         if (req.query.preview == "true"){
             previewMode = true;
         }
-        var streamName = nameGenerator.generateName(shortStreamName);
+        var salt = nameGenerator.generateSalt();
+        var streamName= shortStreamName + salt;
         this.streamStorage.addStream(streamName);
         this.sendResponse(res, 200, this.formDataObject({streamUrl: config.streamUrl, streamName: streamName}));
         console.log("play request sent ok response");
