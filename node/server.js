@@ -25,10 +25,10 @@ app.get ('/streamscopeapi/v1/stream/snapshot', router.getSnapshot);
 
 app.post('/streamscopeapi/v1/user/canPublish', router.canPublish);
 app.post('/streamscopeapi/v1/user/canPlay', router.canPlay);
-/*
-app.post('/streamscopeapi/v1/user/unpublish', userUnpublish);
+
+app.post('/streamscopeapi/v1/user/stopPublish', userStopPublish);
 app.post('/streamscopeapi/v1/user/stopPlay', userStopPlay);
-*/
+
 app.use(function (req, res) {
     sendResponse(res, 404, 'Route not found');
 });
