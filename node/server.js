@@ -7,6 +7,7 @@ var config = require('./config.json');
 var nameGenerator = require('./modules/name-generator');
 var rejecter = require('./modules/rejecter');
 var streamStorage = require('./modules/stream-storage');
+
 var port = config.scopePort;
 
 //@ TODO
@@ -35,7 +36,7 @@ app.use(function (req, res) {
 });
 
 app.listen(port, function () {
-    console.log('Running on http://localhost:' + process.env.SERVER_PORT)
+    console.log('Running on http://localhost:' + port)
 });
 
 function sendResponse (res, code, data) {
@@ -79,10 +80,14 @@ function publishRequest (req, res) {
     }
 }
 function playRequest (req, res) {
-    var shortStreamName = req;
+    var shortStreamName = req.query.id;
     if (rejecter.streamAllowed(shortStreamName)){
+        var previewMode = false;
+        if (req.query.preview == "true"){
+            previewMode = true;
+        }
         var streamName = nameGenerator.generateName(shortStreamName);
-        streamStorage.addUser(shortStreamName);
+        streamStorage.addStream(streamName);
         sendResponse(res, 200, formDataObject(streamName));
     } else {
         sendResponse(res, 400, formErrorObject());
