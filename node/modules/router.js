@@ -1,4 +1,10 @@
-function Router() {
+var config = require('../config.json');
+var nameGenerator = require('./name-generator');
+var rejecter = require('./rejecter');
+var snapshot = require('./snapshot-cache');
+
+function Router(streamStorage) {
+    this.streamStorage = streamStorage;
 }
 
 module.exports=Router;
@@ -16,12 +22,10 @@ Router.prototype.sendResponse = function (res, code, data) {
     console.log("send response", code, data)
 };
 
-Router.prototype.formDataObject = function (streamName){
+Router.prototype.formDataObject = function (data){
     return {
-        data: {
-            streamUrl: config.streamUrl,
-            streamName: streamName
-        }
+        data: data,
+        version: config.version
     };
 };
 
@@ -30,17 +34,18 @@ Router.prototype.formErrorObject = function () {
         error: {
             code: " ",
             message: " "
-        }
+        },
+        version: config.version
     };
 };
 
 Router.prototype.publishRequest = function (req, res) {
     if (rejecter.publishAllowed()){
         var streamName = nameGenerator.generateName();
-        streamStorage.addStream(streamName);
-        this.sendResponse(res, 200, formDataObject(streamName));
+        this.streamStorage.addStream(streamName);
+        this.sendResponse(res, 200, this.formDataObject({streamUrl: config.streamUrl, streamName: streamName}));
     } else {
-        this.sendResponse(res, 400, formErrorObject());
+        this.sendResponse(res, 400, this.formErrorObject());
     }
 };
 
@@ -52,14 +57,39 @@ Router.prototype.playRequest = function (req, res) {
             previewMode = true;
         }
         var streamName = nameGenerator.generateName(shortStreamName);
-        streamStorage.addStream(streamName);
-        this.sendResponse(res, 200, formDataObject(streamName));
+        this.streamStorage.addStream(streamName);
+        this.sendResponse(res, 200, this.formDataObject({streamUrl: config.streamUrl, streamName: streamName}));
     } else {
-        this.sendResponse(res, 400, formErrorObject());
+        this.sendResponse(res, 400, this.formErrorObject());
     }
 };
 
 Router.prototype.getStreams = function (req, res) {
-    var streamsList = streamStorage.getActiveStreams();
-    this.sendResponse(res, 200, {data: streamsList});
+    var streamsList = this.streamStorage.getActiveStreams();
+    this.sendResponse(res, 200, this.formDataObject(streamsList));
+};
+
+Router.prototype.getSnapshot = function (req, res) {
+    var shortStreamName = req.query.id;
+    var currentSnapshot = snapshot.getSnapshot(shortStreamName);
+    // TODO
+    //this.sendResponse(res, 200, {data: currentSnapshot});
+};
+
+Router.prototype.canPublish = function (req, res) {
+    var streamName = req.query.streamName;
+    var allowed = false;
+    if (rejecter.canPublish(streamName)){
+        allowed = true;
+    }
+    this.sendResponse(res, 200, this.formDataObject({"allowed": allowed}));
+};
+
+Router.prototype.canPlay = function (req, res) {
+    var streamName = req.query.streamName;
+    var allowed = false;
+    if (rejecter.canPlay(streamName)){
+        allowed = true;
+    }
+    this.sendResponse(res, 200, this.formDataObject({"allowed": allowed}));
 };
