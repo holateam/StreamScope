@@ -27,7 +27,7 @@ class ActiveStreamManager() {
         } else if ((Date.now() - this.timeInitialize[0].time) > this.pendingPublishLifetime) {
             this.unpublish(this.timeInitialize[0].streamName);
             this.timeInitialize.shift();
-            this.publish();
+            return this.publish();
         } else {
             return false;
         }
@@ -52,7 +52,7 @@ class ActiveStreamManager() {
 
     unpublish(streamName) {
         storage.removeStream(streamName);
-        delete this.activeStreams.streamName;
+        delete this.activeStreams[streamName];
     }
 
     subscribe(streamName, wowzaStreamSession) {
