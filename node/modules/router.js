@@ -1,11 +1,13 @@
+"use strict";
 var config = require('../config.json');
 var nameGenerator = require('./name-generator');
 var rejecter = require('./rejecter');
 var snapshot = require('./snapshot-cache');
+const log = require('./logger');
 
 function Router(activeStreamManager) {
     this.activeStreamManager = activeStreamManager;
-    console.log("router inited");
+    log.info("router inited");
 }
 
 module.exports=Router;
@@ -20,7 +22,7 @@ Router.prototype.sendResponse = function (res, code, data) {
         res.status(code).json({code: code, response: data});
     }
     res.end();
-    console.log("send response", code, data)
+    log.info("send response", code, data)
 };
 
 Router.prototype.formDataObject = function (data){
@@ -41,20 +43,20 @@ Router.prototype.formErrorObject = function () {
 };
 
 Router.prototype.publishRequest = function (req, res) {
-    console.log("publish request");
+    log.info("publish request");
     if (rejecter.publishAllowed()){
         var streamName = nameGenerator.generateName();
         this.activeStreamManager.publish(streamName);
         this.sendResponse(res, 200, this.formDataObject({streamUrl: config.streamUrl, streamName: streamName}));
-        console.log("publish request sent ok response");
+        log.info("publish request sent ok response");
     } else {
         this.sendResponse(res, 400, this.formErrorObject());
-        console.log("publish request sent error response");
+        log.info("publish request sent error response");
     }
 };
 
 Router.prototype.playRequest = function (req, res) {
-    console.log("play request");
+    log.info("play request");
     var shortStreamName = req.query.id;
     if (rejecter.streamAllowed(shortStreamName)){
         var previewMode = false;
@@ -66,70 +68,70 @@ Router.prototype.playRequest = function (req, res) {
 
         this.activeStreamManager.registryUser(streamName);
         this.sendResponse(res, 200, this.formDataObject({streamUrl: config.streamUrl, streamName: streamName}));
-        console.log("play request sent ok response");
+        log.info("play request sent ok response");
     } else {
         this.sendResponse(res, 400, this.formErrorObject());
-        console.log("play request sent error response");
+        log.info("play request sent error response");
     }
 };
 
 Router.prototype.getStreams = function (req, res) {
-    console.log("Streams list request");
+    log.info("Streams list request");
     var streamsList = this.activeStreamManager.getActiveStreams();
     this.sendResponse(res, 200, this.formDataObject(streamsList));
-    console.log("Streams list sent");
+    log.info("Streams list sent");
 };
 
 Router.prototype.getSnapshot = function (req, res) {
-    console.log("Snapshot request");
+    log.info("Snapshot request");
     var shortStreamName = req.query.id;
     var currentSnapshot = snapshot.getSnapshot(shortStreamName);
     // TODO
     //this.sendResponse(res, 200, {data: currentSnapshot});
-    //console.log("Snapshot sent");
+    //log.info("Snapshot sent");
 };
 
 Router.prototype.canPublish = function (req, res) {
-    console.log("canPublish request");
+    log.info("canPublish request");
     var streamName = req.query.streamName;
     //var sessionid = req.query.sessionid;
 
     var allowed = false;
     if (rejecter.canPublish(streamName)){
         allowed = true;
-        console.log("canPublish allowed");
+        log.info("canPublish allowed");
         activeStreamManager.confirmStream(streamName)
     } else {
-        console.log("canPublish rejected");
+        log.info("canPublish rejected");
     }
     this.sendResponse(res, 200, this.formDataObject({"allowed": allowed}));
 };
 
 Router.prototype.canPlay = function (req, res) {
-    console.log("canPlay request");
+    log.info("canPlay request");
     var streamName = req.query.streamName;
     var sessionId = req.query.sessionid;
 
     var allowed = false;
     if (rejecter.canPlay(streamName)){
         allowed = true;
-        console.log("canPlay allowed");
+        log.info("canPlay allowed");
         activeStreamManager.subscribeUser(streamName, sessionId);
     } else {
-        console.log("canPlay rejected");
+        log.info("canPlay rejected");
     }
     this.sendResponse(res, 200, this.formDataObject({"allowed": allowed}));
 };
 
 Router.prototype.stopPlay = function (req, res) {
-    console.log("stopPlay request");
+    log.info("stopPlay request");
     var streamName = req.query.streamName;
     var sessionId = req.query.sessionid;
     activeStreamManager.unsubscribeUser(streamName, sessionId);
 };
 
 Router.prototype.stopPublish = function (req, res) {
-    console.log("stopPublish request");
+    log.info("stopPublish request");
     var streamName = req.query.streamName;
     //var sessionId = req.query.sessionid;
     activeStreamManager.unpublish(streamName);
