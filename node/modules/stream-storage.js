@@ -53,11 +53,28 @@ class StreamStorage {
 
     }
 
-    // getSubscriberData (streamName, wowzaSession) {
+    getSubscriberData (streamName, streamSalt) {
         
-    // }
+        let sreamData = this.getStreamData(streamName);
+        if (!streamData) {
+            return null;
+        }
+        
+        for (let idx in streamData) {
+            if (streamData[idx].streamSalt == streamSalt) {
+                return {
+                    id : idx,
+                    salt : streamData[idx].streamSalt,
+                    wowzaId : streamData[idx].wowzaId
+                }
+            }
+        }
+        
+        return null;
+        
+    }
 
-    subscribeUser(streamName,  wowzaSession, sessionSalt) {
+    subscribeUser(streamName, sessionSalt) {
 
         let streamIdx = this.findStream(streamName);
         if (streamIdx < 0) {
@@ -65,14 +82,31 @@ class StreamStorage {
         }
 
         let subscriber = {
-            wowzaSession    : wowzaSession,
+            wowzaSession    : null,
             sessionSalt     : sessionSalt
         };
         this.streams[streamIdx].subscribers.push(subscriber);
         return true;
 
     }
+    
+    confirmSubscription(streamName, sessionSalt, wowzaSession) {
+        
+        let streamIdx = this.findStream(streamName);
+        if (streamIdx < 0) {
+            return false;
+        }
 
+        let subscriberData = this.getSubscriberData(streamName, sessionSalt);
+        if (!subscriberData) {
+            return false;
+        }
+        
+        this.streams[streamIdx].subscribers[subscriberData.id].wowzaSession = wowzaSession;
+        return true;
+            
+    }
+    
     unsubscribeUser(streamName, wowzaSession) {
 
         let streamIdx = this.findStream(streamName);
