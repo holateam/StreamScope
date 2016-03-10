@@ -25,9 +25,18 @@ class Rejecter {
     }
 
     canPlay (saltedStreamName, wowzaSession) {
-        // let request = this.splitSaltedName(saltedStreamName);
-        // let streamData = this.storage.getStreamData(request.name);
-        // if ()
+        let request = this.splitSaltedName(saltedStreamName);
+        let streamData = this.storage.getStreamData(request.name);
+        
+        if (streamData.subscribers.length >= this.subscribersSlots) {
+            return false;
+        }
+        
+        let subscriberData = this.storage.getSubscriberData(request.name, request.salt);
+        if (subscriberData.wowzaSession) {
+            return false;
+        }
+        
         return true;
     }
 
