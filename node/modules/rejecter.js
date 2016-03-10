@@ -13,13 +13,14 @@ class Rejecter {
     }
 
     publishAllowed () {
-        if (this.storage.getStreamsAmount() >= this.publishingSlots) {
-            return false;
-        } else {
-            return true;
-        }
+        return this.storage.getStreamsAmount() < this.publishingSlots);
     }
-
+    
+    playAllowed (streamName) {
+        let streamData = this.storage.getStreamData(streamName);
+        return streamData.subscribers.length < this.subscribersSlots);
+    }
+    
     canPublish (saltedStreamName, wowzaSession) {
         let request = this.splitSaltedName(saltedStreamName);
         let streamData = this.storage.getStreamData(request.name);
@@ -28,11 +29,6 @@ class Rejecter {
 
     canPlay (saltedStreamName, wowzaSession) {
         let request = this.splitSaltedName(saltedStreamName);
-        let streamData = this.storage.getStreamData(request.name);
-        
-        if (streamData.subscribers.length >= this.subscribersSlots) {
-            return false;
-        }
         
         let subscriberData = this.storage.getSubscriberData(request.name, request.salt);
         if (subscriberData.wowzaSession) {
