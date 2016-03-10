@@ -1,4 +1,4 @@
-# StreamyScope
+# StreamScope
 Client-management service for video-streaming applications
 
 # Examples of query from user
