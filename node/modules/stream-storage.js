@@ -6,10 +6,13 @@ Array.prototype.fastRemove = function(idx) {
     this.pop();
 }
 
+const log = require('./logger');
+
 class StreamStorage {
 
     constructor () {
         this.streams = [];
+        log.info('StreamStorage is initi');
     }
 
     addStream (streamData) {
@@ -19,15 +22,14 @@ class StreamStorage {
         } else if (!streamData.streamSalt) {
             throw Error('streamData.streamSalt option must be defined. Aborting.');
         }
-
-        let stream = {
+        
+        log.info(`StreamStorage: adding new stream: ${streamData.streamName}_${streamData.streamSalt}`);
+        this.streams.push({
             streamName  : streamData.streamName,
             streamSalt  : streamData.streamSalt,
             subscribers : [],
             publishTime  : 0
-        };
-
-        this.streams.push(stream);
+        });
     }
 
     removeStream (streamName) {
@@ -36,7 +38,8 @@ class StreamStorage {
         if (streamIdx < 0) {
             return false;
         }
-
+        
+        log.info(`StreamStorage: removing stream: ${streamData.streamName}`);
         this.streams.fastRemove(idx);
         return true;
 
@@ -81,11 +84,11 @@ class StreamStorage {
             return false;
         }
 
-        let subscriber = {
+        log.info(`StreamStorage: subscribing new user to: ${streamData.streamName}`);
+        this.streams[streamIdx].subscribers.push({
             wowzaSession    : null,
             sessionSalt     : sessionSalt
-        };
-        this.streams[streamIdx].subscribers.push(subscriber);
+        });
         return true;
 
     }
@@ -107,15 +110,27 @@ class StreamStorage {
             
     }
     
-    unsubscribeUser(streamName, wowzaSession) {
-
+    unsubscribeUser(options) {
+        
+        if (!options) {
+            log.error('Options object must be spesified');
+            return false;
+        }
+        
+        if (!options.wowzaSession && !optionsuserSalt) {
+            log.error('At least one of wowzaSession or optionsuserSalt option must be specified');    
+        }
+        
         let streamIdx = this.findStream(streamName);
         if (streamIdx < 0) {
             return false;
         }
-
+        
+        let criterion = (options.wowzaSession) ? options.wowzaSession : options.userSalt;
         for (let idx in this.streams[streamIdx].subscribers) {
-            if (this.streams[streamIdx].subscribers[idx].wowzaSession == wowzaSession) {
+            let subscriber = this.streams[streamIdx].subscribers[idx];
+            let currentValue = (options.wowzaSession) ? subscriber.wowzaSession : sunscriber.userSalt;
+            if (criterion == currentValue) {
                 this.streams[streamIdx].subscribers.fastRemove(idx);
                 return true;
             }
@@ -135,7 +150,8 @@ class StreamStorage {
         if (streamIdx < 0) {
             return false;
         }
-
+        
+        log.info(`StreamStorage: stream ${streamName} is confirmed`);
         this.streams[streamIdx].publishTime = (new Date()).getTime();
         return true;
 
