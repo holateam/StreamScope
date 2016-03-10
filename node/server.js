@@ -5,11 +5,11 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var config = require('./config.json');
 
-var StreamStorage = require('./modules/stream-storage');
-var streamStorage = new StreamStorage;
+var ActiveStreamManager = require('./modules/active-stream-manager');
+var activeStreamManager = new ActiveStreamManager;
 
 var Router = require('./modules/router');
-var router = new Router(streamStorage);
+var router = new Router(activeStreamManager);
 
 var port = config.scopePort;
 
