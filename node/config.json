@@ -12,11 +12,11 @@
         "streaming-N"   : 10
     },
     "timings" : {
-        "snapshotLifetime-Sec"     : 10,
-        "offlineLimit-Sec"         : 60,
-        "pendingConfirmLifetime"   : 60
+        "snapshotLifetime-Sec"        : 10,
+        "offlineLimit-Sec"            : 60,
+        "pendingConfirmLifetime-Sec"  : 60
     },
-    "streamUrl": "streamUrl",
-    "wowzaUrl" : "wowzaUrl",
+    "streamUrl": "rtmp://new.shpp.me:1935/streamyscope",
+    "wowzaUrl" : "http://new.shpp.me:1935/streamyscope/v1/streams",
     "version"  : "0.0.1"
 }

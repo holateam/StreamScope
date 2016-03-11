@@ -10,7 +10,7 @@ class ActiveStreamManager {
         this.storage = storage;
         this.activeStreams = {};
         this.activeUsers = {};
-        this.pendingConfirmLifetime = config.timings.pendingConfirmLifetime;
+        this.pendingConfirmLifetime = config.timings.pendingConfirmLifetime * 1000;
         this.streamUrl = config.streamUrl;
         this.wowzaUrl = config.wowzaUrl;
         log.info(`Active stream manager initialized.`);
@@ -21,7 +21,7 @@ class ActiveStreamManager {
         streamSalt= streamSalt || nameGenerator.generateSalt();
         let fullName = `${streamName}_${streamSalt}`;
         this.activeStreams[streamName] = {fullName: fullName, confirm: false};
-        streamName.addStream({streamName: streamName, streamSalt: streamSalt});
+        this.storage.addStream({streamName: streamName, streamSalt: streamSalt});
         setTimeout(this.removeUnconfirmedPublish.bind(this), this.pendingConfirmLifetime, streamName);
         log.info(`Initialize new publish with name: ${fullName}`);
         return {streamUrl: this.streamUrl, streamName: fullName};
