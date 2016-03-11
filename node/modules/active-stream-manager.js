@@ -96,7 +96,7 @@ class ActiveStreamManager {
 
     removeUnconfirmedPublish (streamName) {
         if (streamName in this.activeStreams && !this.activeStreams[streamName].confirm){
-            this.unpublish(this.activeStreams[streamName]);
+            this.unpublish(streamName);
         }
     }
 
@@ -106,7 +106,7 @@ class ActiveStreamManager {
         }
     }
 
-    upDateStorage(streams) {
+/*    upDateStorage(streams) {
         let streamsList = [];
         streams.forEach((stream)=> {
             let streamName = this.splitPartFullName(stream.streamName, 0);
@@ -125,7 +125,7 @@ class ActiveStreamManager {
 
     reportError() {
         log.error(`Can not get information about active streams from ${this.wowzaUrl}`);
-    }
+    }*/
 
 }
 
