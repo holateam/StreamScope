@@ -1,14 +1,13 @@
 "use strict";
 let request = require('request');
-let StreamStorage = require('./stream-storage.js');
 let NameGenerator = require('./name-generator');
 const config = require('../config.json');
-let storage = new StreamStorage();
 let nameGenerator = new NameGenerator();
 const log = require('./logger');
 
 class ActiveStreamManager {
-    constructor() {
+    constructor(storage) {
+        this.storage = storage;
         this.activeStreams = {};
         this.activeUsers = {};
         this.pendingConfirmLifetime = config.timings.pendingConfirmLifetime;
@@ -22,7 +21,7 @@ class ActiveStreamManager {
         streamSalt= streamSalt || nameGenerator.generateSalt();
         let fullName = `${streamName}_${streamSalt}`;
         this.activeStreams[streamName] = {fullName: fullName, confirm: false};
-        storage.addStream({streamName: streamName, streamSalt: streamSalt});
+        streamName.addStream({streamName: streamName, streamSalt: streamSalt});
         setTimeout(this.removeUnconfirmedPublish.bind(this), this.pendingConfirmLifetime, streamName);
         log.info(`Initialize new publish with name: ${fullName}`);
         return {streamUrl: this.streamUrl, streamName: fullName};
@@ -30,7 +29,7 @@ class ActiveStreamManager {
 
     confirmStream(fullName) {
         let streamName = splitPartFullName(fullName, 0);
-        if (storage.confirmStream(streamName)) {
+        if (this.storage.confirmStream(streamName)) {
             this.activeStreams[streamName].confirm = true;
             log.info(`Confirm publish: ${fullName}`);
         } else {
@@ -40,7 +39,7 @@ class ActiveStreamManager {
     }
 
     unpublish(streamName) {
-        if (storage.removeStream(streamName)) {
+        if (this.storage.removeStream(streamName)) {
             delete this.activeStreams[streamName];
             log.info(`Remove publish: ${streamName} from storage`);
         } else if (streamName in this.activeStreams) {
@@ -51,7 +50,7 @@ class ActiveStreamManager {
 
     subscribeUser(streamName, sessionSalt) {
         sessionSalt = sessionSalt || nameGenerator.generateSalt();
-        if (storage.subscribeUser(streamName, sessionSalt)) {
+        if (this.storage.subscribeUser(streamName, sessionSalt)) {
             this.activeUsers[streamName] = {salt: sessionSalt, confirm: false};
             setTimeout(this.removeUnconfirmedUser.bind(this), this.pendingConfirmLifetime, streamName, sessionSalt);
             log.info(`Initialize new subscribe on stream: ${streamName} for: ${sessionSalt}`);
@@ -65,7 +64,7 @@ class ActiveStreamManager {
     confirmSubscription(streamName, wowzaSession) {
         let shortName = this.splitPartFullName(streamName, 0);
         let sessionSalt = this.splitPartFullName(streamName, 1);
-        if (storage.confirmSubscription(shortName, sessionSalt, wowzaSession)) {
+        if (this.storage.confirmSubscription(shortName, sessionSalt, wowzaSession)) {
             this.activeUsers[shortName].confirm = true;
             log.info(`Confirm subscribe on stream: ${shortName} for: ${wowzaSession}`);
         } else {
@@ -75,7 +74,7 @@ class ActiveStreamManager {
 
     unsubscribeUser(streamData) {
         let streamName = streamData.streamName;
-        if (storage.unsubscribeUser(streamData)) {
+        if (this.storage.unsubscribeUser(streamData)) {
             delete  this.activeUsers[streamName];
             log.info(`Remove subscribe on stream: ${streamName} for: ${(streamData.wowzaSession) ? streamData.wowzaSession : streamData.userSalt}`);
         } else {
@@ -105,6 +104,7 @@ class ActiveStreamManager {
             this.unsubscribeUser({streamName: streamName, userSalt: userSalt});
         }
     }
+
 
     /*upDateStorage(streams) {
         let streamsList = [];
