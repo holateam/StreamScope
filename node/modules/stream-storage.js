@@ -39,8 +39,8 @@ class StreamStorage {
             return false;
         }
         
-        log.info(`StreamStorage: removing stream: ${streamData.streamName}`);
-        this.streams.fastRemove(idx);
+        log.info(`StreamStorage: removing stream: ${streamName}`);
+        this.streams.fastRemove(streamIdx);
         return true;
 
     }
