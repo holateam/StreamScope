@@ -23,7 +23,7 @@ class ActiveStreamManager {
         let fullName = `${streamName}_${streamSalt}`;
         this.activeStreams[streamName] = {fullName: fullName, confirm: false};
         storage.addStream({streamName: streamName, streamSalt: streamSalt});
-        setTimeout(this.removeUnconfirmedPublish, 10, streamName);
+        setTimeout(this.removeUnconfirmedPublish, this.pendingConfirmLifetime, streamName);
         log.info(`Initialize new publish with name: ${fullName}`);
         return {streamUrl: this.streamUrl, streamName: fullName};
     }
@@ -106,26 +106,26 @@ class ActiveStreamManager {
         }
     }
 
-    /*upDateStorage(streams) {
-     let streamsList = [];
-     streams.forEach((stream)=> {
-     let streamName = this.splitPartFullName(stream.streamName, 0);
-     let streamSalt = this.splitPartFullName(stream.streamName, 1);
-     this.publish(streamName, streamSalt);
-     this.confirmStream(stream.streamName);
-     stream.viewers.forEach((user)=> {
-     this.subscribeUser(streamName);
-     this.confirmSubscription(user.fullStreamName, user.sessionId);
-     });
-     streamsList.push({name: stream.streamName, duration: stream.durationSec, liveTime: -1});
-     });
-     log.info(`Return active streams list: ${streamsList};`);
-     return {data: {streams: streamsList}};
-     }
+    upDateStorage(streams) {
+        let streamsList = [];
+        streams.forEach((stream)=> {
+            let streamName = this.splitPartFullName(stream.streamName, 0);
+            let streamSalt = this.splitPartFullName(stream.streamName, 1);
+            this.publish(streamName, streamSalt);
+            this.confirmStream(stream.streamName);
+            stream.viewers.forEach((user)=> {
+                this.subscribeUser(streamName);
+                this.confirmSubscription(user.fullStreamName, user.sessionId);
+            });
+            streamsList.push({name: stream.streamName, duration: stream.durationSec, liveTime: -1});
+        });
+        log.info(`Return active streams list: ${streamsList};`);
+        return {data: {streams: streamsList}};
+    }
 
-     reportError() {
-     log.error(`Can not get information about active streams from ${this.wowzaUrl}`);
-     }*/
+    reportError() {
+        log.error(`Can not get information about active streams from ${this.wowzaUrl}`);
+    }
 
 }
 
