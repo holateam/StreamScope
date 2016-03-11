@@ -58,7 +58,7 @@ class StreamStorage {
 
     getSubscriberData (streamName, streamSalt) {
         
-        let sreamData = this.getStreamData(streamName);
+        let streamData = this.getStreamData(streamName);
         if (!streamData) {
             return null;
         }

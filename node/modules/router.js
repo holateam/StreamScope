@@ -67,7 +67,7 @@ Router.prototype.playRequest = function (req, res) {
             previewMode = true; // TODO?
         }
         var salt = nameGenerator.generateSalt();
-        var streamName= shortStreamName + salt;
+        var streamName= shortStreamName + "_" + salt;
 
         this.activeStreamManager.subscribeUser(streamName, salt);
         this.sendResponse(res, 200, this.formDataObject({streamUrl: config.streamUrl, streamName: streamName}));
