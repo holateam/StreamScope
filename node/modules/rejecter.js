@@ -13,12 +13,12 @@ class Rejecter {
     }
 
     publishAllowed () {
-        return this.storage.getStreamsAmount() < this.publishingSlots);
+        return this.storage.getStreamsAmount() < this.publishingSlots;
     }
     
     playAllowed (streamName) {
         let streamData = this.storage.getStreamData(streamName);
-        return streamData.subscribers.length < this.subscribersSlots);
+        return streamData.subscribers.length < this.subscribersSlots;
     }
     
     canPublish (saltedStreamName, wowzaSession) {

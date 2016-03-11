@@ -10,7 +10,7 @@ function Router(activeStreamManager) {
     log.info("router inited");
 }
 
-module.exports=Router;
+module.exports = Router;
 
 Router.prototype.sendResponse = function (res, code, data) {
     res.statusCode = code;
@@ -45,9 +45,8 @@ Router.prototype.formErrorObject = function () {
 Router.prototype.publishRequest = function (req, res) {
     log.info("publish request");
     if (rejecter.publishAllowed()){
-        var streamName = nameGenerator.generateName();
-        this.activeStreamManager.publish(streamName);
-        this.sendResponse(res, 200, this.formDataObject({streamUrl: config.streamUrl, streamName: streamName}));
+        var data = this.activeStreamManager.publish();
+        this.sendResponse(res, 200, this.formDataObject(data));
         log.info("publish request sent ok response");
     } else {
         this.sendResponse(res, 400, this.formErrorObject());
@@ -66,7 +65,7 @@ Router.prototype.playRequest = function (req, res) {
         var salt = nameGenerator.generateSalt();
         var streamName= shortStreamName + salt;
 
-        this.activeStreamManager.registryUser(streamName);
+        this.activeStreamManager.subscribeUser(streamName, salt);
         this.sendResponse(res, 200, this.formDataObject({streamUrl: config.streamUrl, streamName: streamName}));
         log.info("play request sent ok response");
     } else {
@@ -116,7 +115,7 @@ Router.prototype.canPlay = function (req, res) {
     if (rejecter.canPlay(streamName)){
         allowed = true;
         log.info("canPlay allowed");
-        activeStreamManager.subscribeUser(streamName, sessionId);
+        activeStreamManager.confirmSubscription(streamName, sessionId);
     } else {
         log.info("canPlay rejected");
     }
@@ -127,7 +126,7 @@ Router.prototype.stopPlay = function (req, res) {
     log.info("stopPlay request");
     var streamName = req.query.streamName;
     var sessionId = req.query.sessionid;
-    activeStreamManager.unsubscribeUser(streamName, sessionId);
+    activeStreamManager.unsubscribeUser({streamName: streamName, wowzaSession: sessionId});
 };
 
 Router.prototype.stopPublish = function (req, res) {
