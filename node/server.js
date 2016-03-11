@@ -5,11 +5,14 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var config = require('./config.json');
 
+var StreamStorage = require('./modules/stream-storage.js');
+var storage = new StreamStorage();
+
 var ActiveStreamManager = require('./modules/active-stream-manager');
-var activeStreamManager = new ActiveStreamManager;
+var activeStreamManager = new ActiveStreamManager(storage);
 
 var Router = require('./modules/router');
-var router = new Router(activeStreamManager);
+var router = new Router(activeStreamManager, storage);
 
 var port = config.scopePort;
 
@@ -18,7 +21,10 @@ var app = express();
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-app.post('/streamscopeapi/v1/stream/publish', router.publishRequest);
+app.post('/streamscopeapi/v1/stream/publish', function(req, res) {
+    router.publishRequest (req, res)
+});
+
 app.post('/streamscopeapi/v1/stream/play', router.playRequest);
 app.get ('/streamscopeapi/v1/streams', router.getStreams);
 app.get ('/streamscopeapi/v1/stream/snapshot', router.getSnapshot);

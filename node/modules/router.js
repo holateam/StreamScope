@@ -1,12 +1,14 @@
 "use strict";
 var config = require('../config.json');
 var nameGenerator = require('./name-generator');
-var rejecter = require('./rejecter');
+
 var snapshot = require('./snapshot-cache');
 const log = require('./logger');
 
-function Router(activeStreamManager) {
+function Router(activeStreamManager, storage) {
     this.activeStreamManager = activeStreamManager;
+    var Rejecter = require('./rejecter');
+    this.rejecter = new Rejecter(storage);
     log.info("router inited");
 }
 
@@ -44,7 +46,7 @@ Router.prototype.formErrorObject = function () {
 
 Router.prototype.publishRequest = function (req, res) {
     log.info("publish request");
-    if (rejecter.publishAllowed()){
+    if (this.rejecter.publishAllowed()){
         var data = this.activeStreamManager.publish();
         this.sendResponse(res, 200, this.formDataObject(data));
         log.info("publish request sent ok response");
@@ -57,10 +59,10 @@ Router.prototype.publishRequest = function (req, res) {
 Router.prototype.playRequest = function (req, res) {
     log.info("play request");
     var shortStreamName = req.query.id;
-    if (rejecter.streamAllowed(shortStreamName)){
+    if (this.rejecter.streamAllowed(shortStreamName)){
         var previewMode = false;
         if (req.query.preview == "true"){
-            previewMode = true;
+            previewMode = true; // TODO?
         }
         var salt = nameGenerator.generateSalt();
         var streamName= shortStreamName + salt;
@@ -96,7 +98,7 @@ Router.prototype.canPublish = function (req, res) {
     //var sessionid = req.query.sessionid;
 
     var allowed = false;
-    if (rejecter.canPublish(streamName)){
+    if (this.rejecter.canPublish(streamName)){
         allowed = true;
         log.info("canPublish allowed");
         activeStreamManager.confirmStream(streamName)
@@ -112,7 +114,7 @@ Router.prototype.canPlay = function (req, res) {
     var sessionId = req.query.sessionid;
 
     var allowed = false;
-    if (rejecter.canPlay(streamName)){
+    if (this.rejecter.canPlay(streamName)){
         allowed = true;
         log.info("canPlay allowed");
         activeStreamManager.confirmSubscription(streamName, sessionId);
