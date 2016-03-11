@@ -25,15 +25,33 @@ app.post('/streamscopeapi/v1/stream/publish', function(req, res) {
     router.publishRequest (req, res)
 });
 
-app.post('/streamscopeapi/v1/stream/play', router.playRequest);
-app.get ('/streamscopeapi/v1/streams', router.getStreams);
-app.get ('/streamscopeapi/v1/stream/snapshot', router.getSnapshot);
+app.post('/streamscopeapi/v1/stream/play', function(req, res) {
+    router.playRequest (req, res);
+});
 
-app.get('/streamscopeapi/v1/user/canPublish', router.canPublish);
-app.get('/streamscopeapi/v1/user/canPlay', router.canPlay);
+app.get ('/streamscopeapi/v1/streams', function(req, res) {
+    router.getStreams (req, res);
+});
 
-app.get('/streamscopeapi/v1/user/stopPublish', router.stopPublish);
-app.get('/streamscopeapi/v1/user/stopPlay', router.stopPlay);
+app.get ('/streamscopeapi/v1/stream/snapshot', function(req, res) {
+    router.getSnapshot (req, res);
+});
+
+app.get('/streamscopeapi/v1/user/canPublish', function(req, res) {
+    router.canPublish (req, res);
+});
+
+app.get('/streamscopeapi/v1/user/canPlay', function(req, res) {
+    router.canPlay (req, res);
+});
+
+app.get('/streamscopeapi/v1/user/stopPublish', function(req, res) {
+    router.stopPublish (req, res);
+});
+
+app.get('/streamscopeapi/v1/user/stopPlay', function(req, res) {
+    router.stopPlay (req, res);
+});
 
 app.use(function (req, res) {
     sendResponse(res, 404, 'Route not found');

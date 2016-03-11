@@ -10,7 +10,7 @@ class ActiveStreamManager {
         this.storage = storage;
         this.activeStreams = {};
         this.activeUsers = {};
-        this.pendingConfirmLifetime = config.timings.pendingConfirmLifetime * 1000;
+        this.pendingConfirmLifetime = config.timings["pendingConfirmLifetime-Sec"] * 1000;
         this.streamUrl = config.streamUrl;
         this.wowzaUrl = config.wowzaUrl;
         log.info(`Active stream manager initialized.`);
@@ -28,7 +28,7 @@ class ActiveStreamManager {
     }
 
     confirmStream(fullName) {
-        let streamName = splitPartFullName(fullName, 0);
+        let streamName = this.splitPartFullName(fullName, 0);
         if (this.storage.confirmStream(streamName)) {
             this.activeStreams[streamName].confirm = true;
             log.info(`Confirm publish: ${fullName}`);

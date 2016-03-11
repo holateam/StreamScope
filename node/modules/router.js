@@ -1,6 +1,8 @@
 "use strict";
 var config = require('../config.json');
-var nameGenerator = require('./name-generator');
+
+var NameGenerator = require('./name-generator');
+var nameGenerator = new NameGenerator();
 
 var snapshot = require('./snapshot-cache');
 const log = require('./logger');
@@ -59,7 +61,7 @@ Router.prototype.publishRequest = function (req, res) {
 Router.prototype.playRequest = function (req, res) {
     log.info("play request");
     var shortStreamName = req.query.id;
-    if (this.rejecter.streamAllowed(shortStreamName)){
+    if (this.rejecter.playAllowed(shortStreamName)){
         var previewMode = false;
         if (req.query.preview == "true"){
             previewMode = true; // TODO?
@@ -101,7 +103,7 @@ Router.prototype.canPublish = function (req, res) {
     if (this.rejecter.canPublish(streamName)){
         allowed = true;
         log.info("canPublish allowed");
-        activeStreamManager.confirmStream(streamName)
+        this.activeStreamManager.confirmStream(streamName);
     } else {
         log.info("canPublish rejected");
     }
@@ -117,7 +119,7 @@ Router.prototype.canPlay = function (req, res) {
     if (this.rejecter.canPlay(streamName)){
         allowed = true;
         log.info("canPlay allowed");
-        activeStreamManager.confirmSubscription(streamName, sessionId);
+        this.activeStreamManager.confirmSubscription(streamName, sessionId);
     } else {
         log.info("canPlay rejected");
     }
@@ -128,12 +130,12 @@ Router.prototype.stopPlay = function (req, res) {
     log.info("stopPlay request");
     var streamName = req.query.streamName;
     var sessionId = req.query.sessionid;
-    activeStreamManager.unsubscribeUser({streamName: streamName, wowzaSession: sessionId});
+    this.activeStreamManager.unsubscribeUser({streamName: streamName, wowzaSession: sessionId});
 };
 
 Router.prototype.stopPublish = function (req, res) {
     log.info("stopPublish request");
     var streamName = req.query.streamName;
     //var sessionId = req.query.sessionid;
-    activeStreamManager.unpublish(streamName);
+    this.activeStreamManager.unpublish(streamName);
 };
