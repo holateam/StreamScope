@@ -2,10 +2,8 @@
 let request = require('request');
 let StreamStorage = require('./stream-storage.js');
 let NameGenerator = require('./name-generator');
-//let Rejector = require('./rejecter');
 const config = require('../config.json');
 let storage = new StreamStorage();
-//let rejector = new Rejector(storage);
 let nameGenerator = new NameGenerator();
 const log = require('./logger');
 
@@ -13,7 +11,10 @@ class ActiveStreamManager {
     constructor() {
         this.activeStreams = {};
         this.activeUsers = {};
-        this.pendingConfirmLifetime = config.quotes.pendingConfirmLifetime;
+        this.pendingConfirmLifetime = config.timings.pendingConfirmLifetime;
+        this.streamUrl = config.streamUrl;
+        this.wowzaUrl = config.wowzaUrl;
+        log.info(`Active stream manager initialized.`);
     }
 
     publish(streamName, streamSalt) {
@@ -22,9 +23,9 @@ class ActiveStreamManager {
         let fullName = `${streamName}_${streamSalt}`;
         this.activeStreams[streamName] = {fullName: fullName, confirm: false};
         storage.addStream({streamName: streamName, streamSalt: streamSalt});
-        setTimeout(this.removeNotConfirmPublish(streamName), this.pendingConfirmLifetime);
+        setTimeout(this.removeUnconfirmedPublish, 10, streamName);
         log.info(`Initialize new publish with name: ${fullName}`);
-        return {streamUrl: config.streamUrl, streamName: fullName};
+        return {streamUrl: this.streamUrl, streamName: fullName};
     }
 
     confirmStream(fullName) {
@@ -52,7 +53,7 @@ class ActiveStreamManager {
         userSalt = userSalt || nameGenerator.generateSalt();
         if (storage.subscribeUser(streamName, userSalt)) {
             this.activeUsers[streamName] = {salt: userSalt, confirm: false};
-            setTimeout(this.removeNotConfirmUser(streamName, userSalt), this.pendingConfirmLifetime);
+            setTimeout(this.removeUnconfirmedUser, this.pendingConfirmLifetime, streamName, userSalt);
             log.info(`Initialize new subscribe on stream: ${streamName} for: ${userSalt}`);
             return {streamUrl: config.streamUrl, streamName: `${streamName}_${userSalt}`};
         } else {
@@ -82,30 +83,31 @@ class ActiveStreamManager {
         }
     }
 
-    /*getActiveStreams() {
-     request.get(config.wowzaUrl)
-     .on('response', upDateStorage(data.streams))
-     .on('error', reportError);
+    /* getActiveStreams() {
+     request.get(this.wowzaUrl)
+     .on('response', this.upDateStorage(data.streams))
+     .on('error', this.reportError);
      }*/
 
-    static splitPartFullName (saltedName, idx) {
+    splitPartFullName (saltedName, idx) {
         let slices = saltedName.split('_',2);
         return slices[idx];
     }
 
-    static removeNotConfirmPublish (streamName) {
+    removeUnconfirmedPublish (streamName) {
         if (streamName in this.activeStreams && !this.activeStreams[streamName].confirm){
             this.unpublish(this.activeStreams[streamName]);
         }
     }
 
-    static removeNotConfirmUser (streamName, userSalt) {
+    removeUnconfirmedUser (streamName, userSalt) {
         if (streamName in this.activeUsers && !this.activeUsers[streamName].confirm) {
             this.unsubscribeUser({streamName: streamName, userSalt: userSalt});
         }
     }
 
-    /*    static upDateStorage(streams) {
+    /*upDateStorage(streams) {
+     let streamsList = [];
      streams.forEach((stream)=> {
      let streamName = this.splitPartFullName(stream.streamName, 0);
      let streamSalt = this.splitPartFullName(stream.streamName, 1);
@@ -114,12 +116,15 @@ class ActiveStreamManager {
      stream.viewers.forEach((user)=> {
      this.subscribeUser(streamName);
      this.confirmSubscription(user.fullStreamName, user.sessionId);
-     })
-     })
+     });
+     streamsList.push({name: stream.streamName, duration: stream.durationSec, liveTime: -1});
+     });
+     log.info(`Return active streams list: ${streamsList};`);
+     return {data: {streams: streamsList}};
      }
 
-     static reportError() {
-     log.error(`Can not get information about active streams from ${config.wowzaUrl}`);
+     reportError() {
+     log.error(`Can not get information about active streams from ${this.wowzaUrl}`);
      }*/
 
 }
