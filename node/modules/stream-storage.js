@@ -68,12 +68,12 @@ class StreamStorage {
             return null;
         }
         
-        for (let idx in streamData) {
-            if (streamData[idx].streamSalt == streamSalt) {
+        for (let idx in streamData.sunscribers) {
+            if (streamData.sunscribers[idx].streamSalt == streamSalt) {
                 return {
                     id : idx,
-                    salt : streamData[idx].streamSalt,
-                    wowzaId : streamData[idx].wowzaId
+                    salt : streamData.sunscribers[idx].streamSalt,
+                    wowzaId : streamData.sunscribers[idx].wowzaId
                 }
             }
         }

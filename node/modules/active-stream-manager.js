@@ -98,7 +98,7 @@ class ActiveStreamManager {
     }
 
     getActiveStreams() {
-        let streamList = this.storage.getActiveStreams();
+        let streamList = this.storage.getAllStreams();
         streamList.filter()
     }
 

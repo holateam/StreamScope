@@ -21,7 +21,7 @@ class Rejecter {
         return (streamData) ? (streamData.subscribers.length < this.subscribersSlots) : false;
     }
     
-    canPublish (saltedStreamName, wowzaSession) {
+    canPublish (saltedStreamName) {
         let request = this.splitSaltedName(saltedStreamName);
         let streamData = this.storage.getStreamData(request.name);
         return (streamData) ? (streamData.streamSalt == request.salt) : false;
@@ -65,3 +65,7 @@ module.exports = Rejecter;
 // let rejecter = new Rejecter(storage);
 // console.log(rejecter.publishAllowed());
 // console.log(rejecter.playAllowed('name1'));
+// storage.subscribeUser('name1', 'salt11');
+// console.log(rejecter.canPlay('name1'));
+// console.log(JSON.stringify(rejecter.splitSaltedName('preview-1457811446401_8057')));
+
