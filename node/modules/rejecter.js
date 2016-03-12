@@ -40,6 +40,10 @@ class Rejecter {
 
     splitSaltedName (saltedName) {
         let slises = saltedName.split('_', 2);
+        let dashIdx = slises[0].indexOf('-')
+        if (dashIdx >= 0) {
+            slises[0] = slises[0].substr(dashIdx);
+        }
         return {
             name : slises[0],
             salt : slises[1]
