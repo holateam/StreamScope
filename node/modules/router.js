@@ -102,7 +102,7 @@ Router.prototype.canPlay = function (req, res) {
     var sessionId = req.query.sessionid;
 
     var allowed = false;
-    if (this.rejecter.canPlay(streamName)){
+    if (this.rejecter.canPlay(streamName, sessionId)){
         allowed = true;
         log.info("canPlay allowed");
         this.activeStreamManager.confirmSubscription(streamName, sessionId);
@@ -125,3 +125,15 @@ Router.prototype.stopPublish = function (req, res) {
     //var sessionId = req.query.sessionid;
     this.activeStreamManager.unpublish(streamName);
 };
+
+/*
+ for (var i=0; i< streamData.subscribers.length; i++){
+ if (streamData.subscribers[i].sessionSalt == streamSalt) {
+ return {
+ id : i,
+ salt : streamSalt,
+ wowzaId : streamData.subscribers[i].wowzaId
+ }
+ }
+ }
+ */

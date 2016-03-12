@@ -73,6 +73,6 @@ class SnapshotCache {
 // storage.unsubscribeUser('name1', 'session2');
 // console.log(JSON.stringify(storage.getStreamData('name1')));
 
-// let manager = new ActiveStreamManager(storage);
-// let cacher = new SnapshotCache(manager.getActiveStreams.bind(manager));
-// cacher.start();
+//let manager = new ActiveStreamManager(storage);
+//let cacher = new SnapshotCache(manager.getActiveStreams);
+//cacher.start();
