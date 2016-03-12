@@ -1,7 +1,6 @@
 "use strict";
 
 const config        = require('../config.json');
-const StreamStorage = require('./stream-storage');
 const log           = require('./logger');
 
 class Rejecter {
@@ -28,7 +27,7 @@ class Rejecter {
         return (streamData) ? (streamData.streamSalt == request.salt) : false;
     }
 
-    canPlay (saltedStreamName, wowzaSession) {
+    canPlay (saltedStreamName) {
         let request = this.splitSaltedName(saltedStreamName);
         
         let subscriberData = this.storage.getSubscriberData(request.name, request.salt);
@@ -41,6 +40,10 @@ class Rejecter {
 
     splitSaltedName (saltedName) {
         let slises = saltedName.split('_', 2);
+        let dashIdx = slises[0].indexOf('-')
+        if (dashIdx >= 0) {
+            slises[0] = slises[0].substr(dashIdx);
+        }
         return {
             name : slises[0],
             salt : slises[1]
@@ -51,6 +54,7 @@ module.exports = Rejecter;
 
 
 // TESTING COURT
+// const StreamStorage = require('./stream-storage');
 // let storage = new StreamStorage();
 // let streamData1 = {
 //     streamName  : "name1",

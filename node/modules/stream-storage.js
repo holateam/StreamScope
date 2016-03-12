@@ -12,7 +12,7 @@ class StreamStorage {
 
     constructor () {
         this.streams = [];
-        log.info('StreamStorage is initiated');
+        log.info('StreamStorage initialized');
     }
 
     addStream (streamData) {
@@ -28,7 +28,8 @@ class StreamStorage {
             streamName  : streamData.streamName,
             streamSalt  : streamData.streamSalt,
             subscribers : [],
-            publishTime  : 0
+            publishTime : 0,
+            duration    : streamData.duration || 0
         });
     }
 
@@ -43,6 +44,10 @@ class StreamStorage {
         this.streams.fastRemove(streamIdx);
         return true;
 
+    }
+
+    getAllStreams () {
+        return this.streams;
     }
 
     getStreamData (streamName) {
@@ -84,7 +89,7 @@ class StreamStorage {
             return false;
         }
 
-        log.info(`StreamStorage: subscribing new user to: ${streamData.streamName}`);
+        log.info(`StreamStorage: subscribing new user to: ${streamName}`);
         this.streams[streamIdx].subscribers.push({
             wowzaSession    : null,
             sessionSalt     : sessionSalt
@@ -148,6 +153,10 @@ class StreamStorage {
 
         let streamIdx = this.findStream(streamName);
         if (streamIdx < 0) {
+            return false;
+        }
+        
+        if (this.streams[streamIdx].duration > 0) {
             return false;
         }
         

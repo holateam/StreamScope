@@ -54,7 +54,7 @@ app.get('/streamscopeapi/v1/user/stopPlay', function(req, res) {
 });
 
 app.use(function (req, res) {
-    sendResponse(res, 404, 'Route not found');
+    router.sendResponse(res, 404, 'Route not found');
 });
 
 app.listen(port, function () {

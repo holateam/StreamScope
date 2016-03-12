@@ -19,41 +19,24 @@ module.exports = Router;
 Router.prototype.sendResponse = function (res, code, data) {
     res.statusCode = code;
     res.setHeader('Content-Type', 'application/json');
-    if (typeof data=="string") {
+    if (typeof data=="string") { // error msg
         res.statusMessage = data;
-        res.status(code).json({code: code, error: data});
+        res.status(code).json({error: {code: code, message: data}, version: config.version});
     } else {
-        res.status(code).json({code: code, response: data});
+        res.status(code).json({data: data, version: config.version});
     }
     res.end();
     log.info("send response", code, data)
-};
-
-Router.prototype.formDataObject = function (data){
-    return {
-        data: data,
-        version: config.version
-    };
-};
-
-Router.prototype.formErrorObject = function () {
-    return {
-        error: {
-            code: " ",
-            message: " "
-        },
-        version: config.version
-    };
 };
 
 Router.prototype.publishRequest = function (req, res) {
     log.info("publish request");
     if (this.rejecter.publishAllowed()){
         var data = this.activeStreamManager.publish();
-        this.sendResponse(res, 200, this.formDataObject(data));
+        this.sendResponse(res, 200, data);
         log.info("publish request sent ok response");
     } else {
-        this.sendResponse(res, 400, this.formErrorObject());
+        this.sendResponse(res, 400, "publish request rejected");
         log.info("publish request sent error response");
     }
 };
@@ -62,18 +45,17 @@ Router.prototype.playRequest = function (req, res) {
     log.info("play request");
     var shortStreamName = req.query.id;
     if (this.rejecter.playAllowed(shortStreamName)){
-        var previewMode = false;
-        if (req.query.preview == "true"){
-            previewMode = true; // TODO?
-        }
         var salt = nameGenerator.generateSalt();
-        var streamName= shortStreamName + "_" + salt;
-
-        this.activeStreamManager.subscribeUser(streamName, salt);
-        this.sendResponse(res, 200, this.formDataObject({streamUrl: config.streamUrl, streamName: streamName}));
+        var streamName = this.activeStreamManager.subscribe(shortStreamName, salt, (req.query.preview=="true"));
+        //    shortStreamName + "_" + salt;
+        //if (req.query.preview == "true"){
+        //    streamName = "preview-"+streamName;
+        //}
+        //this.activeStreamManager.subscribeUser(shortStreamName, salt);
+        this.sendResponse(res, 200, {streamUrl: config.streamUrl, streamName: streamName});
         log.info("play request sent ok response");
     } else {
-        this.sendResponse(res, 400, this.formErrorObject());
+        this.sendResponse(res, 400, "play request rejected");
         log.info("play request sent error response");
     }
 };
@@ -85,7 +67,7 @@ Router.prototype.getStreams = function (req, res) {
         .catch(console.log.bind(console));*/
 
     var streamsList = this.activeStreamManager.getActiveStreams();
-    this.sendResponse(res, 200, this.formDataObject(streamsList));
+    this.sendResponse(res, 200, streamsList);
     log.info("Streams list sent");
 };
 
@@ -111,7 +93,7 @@ Router.prototype.canPublish = function (req, res) {
     } else {
         log.info("canPublish rejected");
     }
-    this.sendResponse(res, 200, this.formDataObject({"allowed": allowed}));
+    this.sendResponse(res, 200, {"allowed": allowed});
 };
 
 Router.prototype.canPlay = function (req, res) {
@@ -127,7 +109,7 @@ Router.prototype.canPlay = function (req, res) {
     } else {
         log.info("canPlay rejected");
     }
-    this.sendResponse(res, 200, this.formDataObject({"allowed": allowed}));
+    this.sendResponse(res, 200, {"allowed": allowed});
 };
 
 Router.prototype.stopPlay = function (req, res) {
