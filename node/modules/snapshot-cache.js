@@ -14,6 +14,7 @@ class SnapshotCache {
         this.snapshotInterval = config.timings['snapshotLifetime-Sec'] * 1000;
         this.targetStreamsSource = targetStreamsSource;
         log.info('StapshotCache initialized');
+        log.info(this.targetStreamsSource);
     }
 
     start () {
@@ -73,5 +74,5 @@ storage.unsubscribeUser('name1', 'session2');
 console.log(JSON.stringify(storage.getStreamData('name1')));
 
 let manager = new ActiveStreamManager(storage);
-let cacher = new SnapshotCache(manager.getActiveStreams);
+let cacher = new SnapshotCache(manager.getActiveStreams.bind(manager));
 cacher.start();

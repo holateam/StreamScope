@@ -126,7 +126,7 @@ class StreamStorage {
             log.error('At least one of wowzaSession or optionsuserSalt option must be specified');    
         }
         
-        let streamIdx = this.findStream(streamName);
+        let streamIdx = this.findStream(options.streamName);
         if (streamIdx < 0) {
             return false;
         }
@@ -134,7 +134,7 @@ class StreamStorage {
         let criterion = (options.wowzaSession) ? options.wowzaSession : options.userSalt;
         for (let idx in this.streams[streamIdx].subscribers) {
             let subscriber = this.streams[streamIdx].subscribers[idx];
-            let currentValue = (options.wowzaSession) ? subscriber.wowzaSession : sunscriber.userSalt;
+            let currentValue = (options.wowzaSession) ? subscriber.wowzaSession : subscriber.userSalt;
             if (criterion == currentValue) {
                 this.streams[streamIdx].subscribers.fastRemove(idx);
                 return true;
