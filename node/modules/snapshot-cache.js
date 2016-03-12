@@ -14,6 +14,7 @@ class SnapshotCache {
         this.snapshotInterval = config.timings['snapshotLifetime-Sec'] * 1000;
         this.targetStreamsSource = targetStreamsSource;
         log.info('StapshotCache initialized');
+        log.info(this.targetStreamsSource);
     }
 
     start () {
@@ -47,31 +48,31 @@ class SnapshotCache {
 
 // TESTING COURT
 
-const StreamStorage = require('./stream-storage');
-const ActiveStreamManager = require('./active-stream-manager');
+// const StreamStorage = require('./stream-storage');
+// const ActiveStreamManager = require('./active-stream-manager');
 
-let storage = new StreamStorage();
-let streamData1 = {
- streamName  : "name1",
- streamSalt  : "salt1"   
-};
-let streamData2 = {
- streamName  : "name2",
- streamSalt  : "salt2"   
-};
+// let storage = new StreamStorage();
+// let streamData1 = {
+//  streamName  : "name1",
+//  streamSalt  : "salt1"   
+// };
+// let streamData2 = {
+//  streamName  : "name2",
+//  streamSalt  : "salt2"   
+// };
 
-storage.addStream(streamData1);
-storage.addStream(streamData2);
-console.log(JSON.stringify(storage));
-storage.subscribeUser('name1', 'session1', 'salt11');
-storage.subscribeUser('name1', 'session2', 'salt12');
-storage.subscribeUser('name1', 'session3', 'salt13');
-storage.subscribeUser('name2', 'session4', 'salt21');
-storage.subscribeUser('name3', 'session5', 'salt31');
-console.log(JSON.stringify(storage));
-storage.unsubscribeUser('name1', 'session2');
-console.log(JSON.stringify(storage.getStreamData('name1')));
+// storage.addStream(streamData1);
+// storage.addStream(streamData2);
+// console.log(JSON.stringify(storage));
+// storage.subscribeUser('name1', 'session1', 'salt11');
+// storage.subscribeUser('name1', 'session2', 'salt12');
+// storage.subscribeUser('name1', 'session3', 'salt13');
+// storage.subscribeUser('name2', 'session4', 'salt21');
+// storage.subscribeUser('name3', 'session5', 'salt31');
+// console.log(JSON.stringify(storage));
+// storage.unsubscribeUser('name1', 'session2');
+// console.log(JSON.stringify(storage.getStreamData('name1')));
 
-let manager = new ActiveStreamManager(storage);
-let cacher = new SnapshotCache(manager.getActiveStreams);
-cacher.start();
+// let manager = new ActiveStreamManager(storage);
+// let cacher = new SnapshotCache(manager.getActiveStreams.bind(manager));
+// cacher.start();
