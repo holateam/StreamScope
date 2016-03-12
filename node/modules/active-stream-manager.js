@@ -10,32 +10,47 @@ class ActiveStreamManager {
         this.storage = storage;
         this.activeStreams = {};
         this.activeUsers = {};
+        this.initialize();
         this.pendingConfirmLifetime = config.timings["pendingConfirmLifetime-Sec"] * 1000;
         this.streamUrl = config.streamUrl;
         this.wowzaUrl = config.wowzaUrl;
         log.info(`Active stream manager initialized.`);
     }
 
-    publish(streamName, streamSalt) {
+    initialize() {
+        Promise.resolve(sendRequest(this.wowzaUrl))
+            .then((response)=> {
+                if (response.statusCode == 200) {
+                    let body = JSON.parse(response.body);
+                    this.upDateStorage(body.data.streams);
+                } else {
+                    log.error(`On request on ${this.wowzaUrl} get statusCode: ${response.statusCode} statusMessage: ${response.statusMessage}`);
+                }
+            })
+            .catch((error)=> {
+                log.error(`On request on ${this.wowzaUrl} get ${error.toString()}`);
+            });
+    }
+
+    publish(streamName, streamSalt, duration) {
         streamName = streamName || nameGenerator.generateName();
         streamSalt= streamSalt || nameGenerator.generateSalt();
         let fullName = `${streamName}_${streamSalt}`;
         this.activeStreams[streamName] = {fullName: fullName, confirm: false};
-        this.storage.addStream({streamName: streamName, streamSalt: streamSalt});
+        this.storage.addStream({streamName: streamName, streamSalt: streamSalt, duration: duration});
         setTimeout(this.removeUnconfirmedPublish.bind(this), this.pendingConfirmLifetime, streamName);
         log.info(`Initialize new publish with name: ${fullName}`);
         return {streamUrl: this.streamUrl, streamName: fullName};
     }
 
-    confirmStream(fullName, duration) {
+    confirmStream(fullName) {
         let streamName = this.splitPartFullName(fullName, 0);
-        if (this.storage.confirmStream(streamName, duration)) {
+        if (this.storage.confirmStream(streamName)) {
             this.activeStreams[streamName].confirm = true;
             log.info(`Confirm publish: ${fullName}`);
         } else {
             log.error(`Unable to confirm publish stream: ${fullName}`);
         }
-
     }
 
     unpublish(streamName) {
@@ -48,20 +63,20 @@ class ActiveStreamManager {
         }
     }
 
-    subscribeUser(streamName, sessionSalt) {
-        sessionSalt = sessionSalt || nameGenerator.generateSalt();
+    subscribe(streamName, sessionSalt, preveiw) {
         if (this.storage.subscribeUser(streamName, sessionSalt)) {
             this.activeUsers[streamName] = {salt: sessionSalt, confirm: false};
             setTimeout(this.removeUnconfirmedUser.bind(this), this.pendingConfirmLifetime, streamName, sessionSalt);
             log.info(`Initialize new subscribe on stream: ${streamName} for: ${sessionSalt}`);
-            return {streamUrl: config.streamUrl, streamName: `${streamName}_${sessionSalt}`};
+            return (preveiw) ? `preview-${streamName}_${sessionSalt}` : `{streamName}_${sessionSalt}`;
         } else {
             log.info(`Reject initialize subscribe on unavailable stream: ${streamName}`);
-            return { error: { code: 400, message: "Stream: ${streamName} is not available" }, version: config.version };
         }
     }
 
     confirmSubscription(streamName, wowzaSession) {
+        let pos = streamName.lastIndexOf('-');
+        streamName = (pos >= 0) ? streamName.substr(pos + 1) : streamName;
         let shortName = this.splitPartFullName(streamName, 0);
         let sessionSalt = this.splitPartFullName(streamName, 1);
         if (this.storage.confirmSubscription(shortName, sessionSalt, wowzaSession)) {
@@ -83,18 +98,8 @@ class ActiveStreamManager {
     }
 
     getActiveStreams() {
-        return Promise.resolve(sendRequest(this.wowzaUrl))
-            .then((response)=> {
-                if (response.statusCode == 200) {
-                    let body = JSON.parse(response.body);
-                    return this.upDateStorage(body.data.streams);
-                } else {
-                    return this.reportError(`statusCode: ${response.statusCode}`, response.statusCode, response.statusMessage);
-                }
-            })
-            .catch((error)=> {
-                return this.reportError(error);
-            });
+        let streamList = this.storage.getActiveStreams();
+        streamList.filter()
     }
 
     splitPartFullName (fullName, idx) {
@@ -116,7 +121,7 @@ class ActiveStreamManager {
 
 
     upDateStorage(streams) {
-        let streamList = [];
+       // let streamList = [];
         streams.forEach((stream)=> {
             let streamSalt = this.splitPartFullName(stream.id, 1);
             this.publish(stream.streamName, streamSalt);
@@ -125,17 +130,16 @@ class ActiveStreamManager {
                 this.subscribeUser(stream.streamName, user.sessionId);
                 this.confirmSubscription(`${stream.streamName}_${user.sessionId}`, user.ip);
             });
-            streamList.push({name: stream.streamName, duration: stream.durationSec, liveTime: -1});
+        //    streamList.push({name: stream.streamName, duration: stream.durationSec, liveTime: -1});
         });
-        log.info(`Return active streams list: ${streamList};`);
-        return {data: {streams: streamList}};
+        log.info(`Up-date stream storage`);
+     //   return {code: 200, data: {data: {streams: streamList}, version: config.version}};
     }
 
     reportError(error, statusCode, statusMessage) {
         statusCode = statusCode || 404;
-        let msg = statusMessage || error;
-        log.error(`On request on ${this.wowzaUrl} get ${error}`);
-        return { error: { code: statusCode, message: msg }, version: config.version };
+        let msg = statusMessage || error.toString();
+        log.error(`On request on ${this.wowzaUrl} get ${msg}`);
     }
 }
 

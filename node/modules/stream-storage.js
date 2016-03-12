@@ -89,7 +89,7 @@ class StreamStorage {
             return false;
         }
 
-        log.info(`StreamStorage: subscribing new user to: ${streamData.streamName}`);
+        log.info(`StreamStorage: subscribing new user to: ${streamName}`);
         this.streams[streamIdx].subscribers.push({
             wowzaSession    : null,
             sessionSalt     : sessionSalt
