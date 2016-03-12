@@ -80,6 +80,10 @@ Router.prototype.playRequest = function (req, res) {
 
 Router.prototype.getStreams = function (req, res) {
     log.info("Streams list request");
+    /*Promise.resolve(this.activeStreamManager.getActiveStreams())
+        .then((streamsList)=> {this.sendResponse(res, 200, this.formDataObject(streamsList));})
+        .catch(console.log.bind(console));*/
+
     var streamsList = this.activeStreamManager.getActiveStreams();
     this.sendResponse(res, 200, this.formDataObject(streamsList));
     log.info("Streams list sent");
