@@ -61,19 +61,20 @@ class StreamStorage {
 
     }
 
-    getSubscriberData (streamName, streamSalt) {
+    getSubscriberData (streamName, sessionSalt) {
         
         let streamData = this.getStreamData(streamName);
         if (!streamData) {
             return null;
         }
         
-        for (let idx in streamData.sunscribers) {
-            if (streamData.sunscribers[idx].streamSalt == streamSalt) {
+        for (let idx in streamData.subscribers) {
+            console.log(idx, streamData.subscribers[idx]);
+            if (streamData.subscribers[idx].sessionSalt == sessionSalt) {
                 return {
                     id : idx,
-                    salt : streamData.sunscribers[idx].streamSalt,
-                    wowzaId : streamData.sunscribers[idx].wowzaId
+                    salt : streamData.subscribers[idx].streamSalt,
+                    wowzaId : streamData.subscribers[idx].wowzaId
                 }
             }
         }
@@ -192,11 +193,11 @@ module.exports = StreamStorage;
 // storage.addStream(streamData1);
 // storage.addStream(streamData2);
 // console.log(JSON.stringify(storage));
-// storage.subscribeUser('name1', 'session1', 'salt11');
-// storage.subscribeUser('name1', 'session2', 'salt12');
-// storage.subscribeUser('name1', 'session3', 'salt13');
-// storage.subscribeUser('name2', 'session4', 'salt21');
-// storage.subscribeUser('name3', 'session5', 'salt31');
+// storage.subscribeUser('name1', 'session1');
+// storage.subscribeUser('name1', 'session2');
+// storage.subscribeUser('name1', 'session3');
+// storage.subscribeUser('name2', 'session4');
+// storage.subscribeUser('name3', 'session5');
 // console.log(JSON.stringify(storage));
 // storage.unsubscribeUser('name1', 'session2');
-// console.log(JSON.stringify(storage.getStreamData('name1')));
+// console.log(JSON.stringify(storage.getSubscriberData('name1', 'session3')));
