@@ -96,14 +96,22 @@ class ActiveStreamManager {
             delete  this.activeUsers[streamName];
             log.info(`Remove subscribe on stream: ${streamName} for: ${(streamData.wowzaSession) ? streamData.wowzaSession : streamData.userSalt}`);
         } else {
-            log.error(`Unable to find matches to stream: ${shortName} and ${(streamData.wowzaSession) ? streamData.wowzaSession : streamData.userSalt}`);
+            log.error(`Unable to find matches to stream: ${streamName} and ${(streamData.wowzaSession) ? streamData.wowzaSession : streamData.userSalt}`);
         }
     }
 
-   /* getActiveStreams() {
-        let streamList = this.storage.getActiveStreams();
-        streamList.filter()
-    }*/
+    getActiveStreams() {
+        let activeStreamList = [];
+        let streamList = this.storage.getAllStreams();
+        for (let stream of streamList) {
+            if (this.activeStreams[stream.streamName].confirm) {
+                let duration = (stream.duration) ? stream.duration : -1;
+                let liveTime = (stream.publishTime) ? ((new Date()).getTime() - stream.publishTime)/1000 : -1;
+                activeStreamList.push({name: this.activeStreams[stream.streamName].fullName, duration: duration, liveTime: liveTime});
+            }
+        }
+        return {streams: activeStreamList};
+    }
 
     splitPartFullName (fullName, idx) {
         let slices = fullName.split('_' , 2);
@@ -124,7 +132,6 @@ class ActiveStreamManager {
 
 
     upDateStorage(streams) {
-       // let streamList = [];
         streams.forEach((stream)=> {
             let streamSalt = this.splitPartFullName(stream.id, 1);
             this.publish(stream.streamName, streamSalt);
@@ -133,16 +140,8 @@ class ActiveStreamManager {
                 this.subscribeUser(stream.streamName, user.sessionId);
                 this.confirmSubscription(`${stream.streamName}_${user.sessionId}`, user.ip);
             });
-        //    streamList.push({name: stream.streamName, duration: stream.durationSec, liveTime: -1});
         });
         log.info(`Up-date stream storage`);
-     //   return {code: 200, data: {data: {streams: streamList}, version: config.version}};
-    }
-
-    reportError(error, statusCode, statusMessage) {
-        statusCode = statusCode || 404;
-        let msg = statusMessage || error.toString();
-        log.error(`On request on ${this.wowzaUrl} get ${msg}`);
     }
 }
 
