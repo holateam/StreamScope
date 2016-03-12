@@ -14,13 +14,14 @@ function sendRequest (uri) {
             uri: uri
         }))
         .then((incomingMsg)=> {
-            response.error = incomingMsg.error;
             response.statusCode = incomingMsg.statusCode;
+            response.statusMessage = incomingMsg.statusMessage;
             response.body = incomingMsg.body;
             return response;
         })
         .catch((error)=> {
             log.error(`On request on ${uri} get ${error}`);
+            throw new Error(error);
         });
 }
 

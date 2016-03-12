@@ -85,17 +85,15 @@ class ActiveStreamManager {
     getActiveStreams() {
         return Promise.resolve(sendRequest(this.wowzaUrl))
             .then((response)=> {
-                if (response.error) {
-                    return this.reportError(response.error);
-                } else if (response.statusCode == 200) {
+                if (response.statusCode == 200) {
                     let body = JSON.parse(response.body);
                     return this.upDateStorage(body.data.streams);
                 } else {
-                    return this.reportError(`statusCode: ${response.statusCode}`);
+                    return this.reportError(`statusCode: ${response.statusCode}`, response.statusCode, response.statusMessage);
                 }
             })
             .catch((error)=> {
-                log.error(`On request on ${this.wowzaUrl} get ${error}`);
+                return this.reportError(error);
             });
     }
 
@@ -133,9 +131,11 @@ class ActiveStreamManager {
         return {data: {streams: streamList}};
     }
 
-    reportError(error) {
+    reportError(error, statusCode, statusMessage) {
+        statusCode = statusCode || 404;
+        let msg = statusMessage || error;
         log.error(`On request on ${this.wowzaUrl} get ${error}`);
-        return { error: { code: 404, message: error }, version: config.version };
+        return { error: { code: statusCode, message: msg }, version: config.version };
     }
 }
 
