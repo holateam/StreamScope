@@ -3,6 +3,10 @@
     "scopePort"       : 1111,
     "wowzaServer"     : "wserver.com",
     "wowzaPort"       : 1112,
+    "ranges"  : {
+        "saltMin" : 1000,
+        "saltMax" : 9999
+    },
     "quotes"  : {
         "publishing-N"  : 10,
         "streaming-N"   : 10
