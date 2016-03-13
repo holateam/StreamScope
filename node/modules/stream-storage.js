@@ -1,100 +1,120 @@
 "use strict";
 
 Array.prototype.fastRemove = function(idx) {
-	let last = this.length - 1;
-	this[idx] = this[last];
-	this.pop();
+    let last = this.length - 1;
+    this[idx] = this[last];
+    this.pop();
 }
 
 class StreamStorage {
 
-	constructor () {
-		this.streams = [];
-	}
+    constructor () {
+        this.streams = [];
+    }
 
-	addStream (streamData) {
+    addStream (streamData) {
 
-		if (!streamData.streamName) {
-			throw Error('streamData.streamName option must be defined. Aborting.');
-		} else if (!streamData.streamSalt) {
-			throw Error('streamData.streamSalt option must be defined. Aborting.');
-		}
+        if (!streamData.streamName) {
+            throw Error('streamData.streamName option must be defined. Aborting.');
+        } else if (!streamData.streamSalt) {
+            throw Error('streamData.streamSalt option must be defined. Aborting.');
+        }
 
-		let stream = {
-			streamName	: streamData.streamName,
-			streamSalt	: streamData.streamSalt,
-			subscribers	: [],
-			pubishTime	: (new Date()).getTime()
-		};
+        let stream = {
+            streamName  : streamData.streamName,
+            streamSalt  : streamData.streamSalt,
+            subscribers : [],
+            publishTime  : 0
+        };
 
-		this.streams.push(stream);
-	}
+        this.streams.push(stream);
+    }
 
-	removeStream (streamName) {
+    removeStream (streamName) {
 
-		let streamIdx = this.findStream(streamName);
-		if (streamIdx < 0) {
-			return false;
-		}
+        let streamIdx = this.findStream(streamName);
+        if (streamIdx < 0) {
+            return false;
+        }
 
-		this.streams.fastRemove(idx);
-		return true;
+        this.streams.fastRemove(idx);
+        return true;
 
-	}
+    }
 
-	getStreamData (streamName) {
+    getStreamData (streamName) {
 
-		let streamIdx = this.findStream(streamName);
-		if (streamIdx < 0) {
-			return null;
-		}
+        let streamIdx = this.findStream(streamName);
+        if (streamIdx < 0) {
+            return null;
+        }
 
-		return this.streams[streamIdx];
+        return this.streams[streamIdx];
 
-	}
+    }
 
-	subscribeUser(streamName,  wowzaSession, sessionSalt) {
+    // getSubscriberData (streamName, wowzaSession) {
+        
+    // }
 
-		let streamIdx = this.findStream(streamName);
-		if (streamIdx < 0) {
-			return false;
-		}
+    subscribeUser(streamName,  wowzaSession, sessionSalt) {
 
-		let subscriber = {
-			wowzaSession	: wowzaSession,
-			sessionSalt		: sessionSalt
-		};
-		this.streams[streamIdx].subscribers.push(subscriber);
-		return true;
+        let streamIdx = this.findStream(streamName);
+        if (streamIdx < 0) {
+            return false;
+        }
 
-	}
+        let subscriber = {
+            wowzaSession    : wowzaSession,
+            sessionSalt     : sessionSalt
+        };
+        this.streams[streamIdx].subscribers.push(subscriber);
+        return true;
 
-	unsubscribeUser(streamName, wowzaSession) {
+    }
 
-		let streamIdx = this.findStream(streamName);
-		if (streamIdx < 0) {
-			return false;
-		}
+    unsubscribeUser(streamName, wowzaSession) {
 
-		for (let idx in this.streams[streamIdx].subscribers) {
-			if (this.streams[streamIdx].subscribers[idx].wowzaSession == wowzaSession) {
-				this.streams[streamIdx].subscribers.fastRemove(idx);
-				return true;
-			}
-		}
+        let streamIdx = this.findStream(streamName);
+        if (streamIdx < 0) {
+            return false;
+        }
 
-		return false;
-		
-	}
+        for (let idx in this.streams[streamIdx].subscribers) {
+            if (this.streams[streamIdx].subscribers[idx].wowzaSession == wowzaSession) {
+                this.streams[streamIdx].subscribers.fastRemove(idx);
+                return true;
+            }
+        }
 
-	findStream(streamName) {
-		for (let idx in this.streams) {
-			if (this.streams[idx].streamName == streamName) {
-				return idx;
-			}
-		}
-		return -1;
-	}
+        return false;
+        
+    }
+
+    getStreamsAmount() {
+        return this.streams.length;
+    }
+
+    confirmStream(streamName) {
+
+        let streamIdx = this.findStream(streamName);
+        if (streamIdx < 0) {
+            return false;
+        }
+
+        this.streams[streamIdx].publishTime = (new Date()).getTime();
+        return true;
+
+    }
+
+    findStream(streamName) {
+        for (let idx in this.streams) {
+            if (this.streams[idx].streamName == streamName) {
+                return idx;
+            }
+        }
+        return -1;
+    }
 
 }
 module.exports = StreamStorage;
@@ -102,12 +122,12 @@ module.exports = StreamStorage;
 // TESTING COURT
 // let storage = new StreamStorage();
 // let streamData1 = {
-// 	streamName 	: "name1",
-// 	streamSalt	: "salt1"	
+//  streamName  : "name1",
+//  streamSalt  : "salt1"   
 // };
 // let streamData2 = {
-// 	streamName 	: "name2",
-// 	streamSalt	: "salt2"	
+//  streamName  : "name2",
+//  streamSalt  : "salt2"   
 // };
 
 // storage.addStream(streamData1);
