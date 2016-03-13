@@ -15,5 +15,6 @@
         "snapshotLifetime-Sec"     : 10,
         "offlineLimit-Sec"         : 60
     },
-    "streamUrl": "streamUrl"
+    "streamUrl": "streamUrl",
+    "version": "0.0.1"
 }
