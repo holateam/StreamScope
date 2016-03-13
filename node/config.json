@@ -10,5 +10,6 @@
     "timings" : {
         "snapshotLifetime-Sec"     : 10,
         "offlineLimit-Sec"         : 60
-    }
+    },
+    "streamUrl": "streamUrl"
 }
