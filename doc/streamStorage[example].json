@@ -1,0 +1,8 @@
+[
+	{
+		"streamName" 	: "str",
+		"streamSalt" 	: "str",
+		"subscribers"	: ["sesionID1", "sesionID2", "sesionID3"],
+		"pubishTime"	: 14151617181920
+	}
+]

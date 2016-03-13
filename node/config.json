@@ -1,0 +1,14 @@
+{
+    "scopeServer"     : "server.com",
+    "scopePort"       : 1111,
+    "wowzaServer"     : "wserver.com",
+    "wowzaPort"       : 1112,
+    "quotes"  : {
+        "publishing-N"  : 10,
+        "streaming-N"   : 10
+    },
+    "timings" : {
+        "snapshotLifetime-Sec"     : 10,
+        "offlineLimit-Sec"         : 60
+    }
+}
