@@ -2,7 +2,20 @@
 	{
 		"streamName" 	: "str",
 		"streamSalt" 	: "str",
-		"subscribers"	: ["sesionID1", "sesionID2", "sesionID3"],
+		"subscribers"	: [ 
+			{ 
+				"wowzaSession"  : "sesionID1",
+				"sessionSalt"	: "str"
+			},
+			{ 
+				"wowzaSession"  : "sesionID2",
+				"sessionSalt"	: "str"
+			},
+			{ 
+				"wowzaSession"  : "sesionID3",
+				"sessionSalt"	: "str"
+			}
+		],
 		"pubishTime"	: 14151617181920
 	}
 ]
