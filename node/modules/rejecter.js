@@ -13,7 +13,7 @@ class Rejecter {
     }
 
     publishAllowed () {
-        return this.storage.getStreamsAmount() < this.publishingSlots);
+        return this.storage.getStreamsAmount() < this.publishingSlots;
     }
     
     playAllowed (streamName) {
