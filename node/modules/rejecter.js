@@ -18,7 +18,7 @@ class Rejecter {
     
     playAllowed (streamName) {
         let streamData = this.storage.getStreamData(streamName);
-        return streamData.subscribers.length < this.subscribersSlots);
+        return streamData.subscribers.length < this.subscribersSlots;
     }
     
     canPublish (saltedStreamName, wowzaSession) {
