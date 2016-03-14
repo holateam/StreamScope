@@ -1,22 +1,22 @@
 /**
  * Created by Uzer on 09.03.2016.
  */
-var express = require('express');
-var bodyParser = require('body-parser');
-var config = require('./config.json');
+const express = require('express');
+const bodyParser = require('body-parser');
+const config = require('./config.json');
 
-var StreamStorage = require('./modules/stream-storage.js');
-var storage = new StreamStorage();
+const StreamStorage = require('./modules/stream-storage.js');
+const storage = new StreamStorage();
 
-var ActiveStreamManager = require('./modules/active-stream-manager');
-var activeStreamManager = new ActiveStreamManager(storage);
+const ActiveStreamManager = require('./modules/active-stream-manager');
+const activeStreamManager = new ActiveStreamManager(storage);
 
-var Router = require('./modules/router');
-var router = new Router(activeStreamManager, storage);
+const Router = require('./modules/router');
+const router = new Router(activeStreamManager, storage);
 
-var port = config.scopePort;
+const log = require('./modules/logger');
 
-var app = express();
+const app = express();
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
@@ -44,7 +44,7 @@ app.get('/streamyscopeapi/v1/publishstart', function(req, res) {
     router.canPublish (req, res);
 });
 
-app.get('/streamyscopeapi/v1/user/canPlay', function(req, res) {
+app.get('/streamscopeapi/v1/user/canPlay', function(req, res) {
     router.canPlay (req, res);
 });
 app.get('/streamyscopeapi/v1/viewerstart', function(req, res) {
@@ -67,9 +67,9 @@ app.get('/streamyscopeapi/v1/viewerstop', function(req, res) {
 
 app.use(function (req, res) {
     router.sendResponse(res, 404, 'Route not found');
-    console.log(req.originalUrl);
+    log.info(req.originalUrl);
 });
 
-app.listen(port, function () {
-    console.log('Running on http://localhost:' + port)
+app.listen(config.scopePort, function () {
+    log.info('Running on http://localhost:' + config.scopePort)
 });
