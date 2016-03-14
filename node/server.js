@@ -40,33 +40,34 @@ app.get ('/streamscopeapi/v1/stream/snapshot', function(req, res) {
 app.get('/streamscopeapi/v1/user/canPublish', function(req, res) {
     router.canPublish (req, res);
 });
-app.get('/publishstart', function(req, res) {
+app.get('/streamyscopeapi/v1/publishstart', function(req, res) {
     router.canPublish (req, res);
 });
 
-app.get('/streamscopeapi/v1/user/canPlay', function(req, res) {
+app.get('/streamyscopeapi/v1/user/canPlay', function(req, res) {
     router.canPlay (req, res);
 });
-app.get('/viewerstart', function(req, res) {
+app.get('/streamyscopeapi/v1/viewerstart', function(req, res) {
     router.canPlay (req, res);
 });
 
 app.get('/streamscopeapi/v1/user/stopPublish', function(req, res) {
     router.stopPublish (req, res);
 });
-app.get('/publishstop', function(req, res) {
+app.get('/streamyscopeapi/v1/publishstop', function(req, res) {
     router.stopPublish (req, res);
 });
 
 app.get('/streamscopeapi/v1/user/stopPlay', function(req, res) {
     router.stopPlay (req, res);
 });
-app.get('/viewerstop', function(req, res) {
+app.get('/streamyscopeapi/v1/viewerstop', function(req, res) {
     router.stopPlay (req, res);
 });
 
 app.use(function (req, res) {
     router.sendResponse(res, 404, 'Route not found');
+    console.log(req.originalUrl);
 });
 
 app.listen(port, function () {
