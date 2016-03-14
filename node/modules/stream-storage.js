@@ -117,7 +117,7 @@ class StreamStorage {
             return false;
         }
         
-        if (!options.wowzaSession && !optionsuserSalt) {
+        if (!options.wowzaSession && !options.userSalt) {
             log.error('At least one of wowzaSession or optionsuserSalt option must be specified');    
         }
         
