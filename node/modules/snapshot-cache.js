@@ -47,7 +47,7 @@ class SnapshotCache {
         this.activeStreamManager.subscribe(streamName, salt);
         Promise.resolve(cpExecAsync(command))
             .then((param) => {
-                console.log(param);
+                console.log("Param!", param);
                 log.info(`StapshotCache: ${streamName} is cached`);
             })
             .catch((e) => {

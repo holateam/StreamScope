@@ -67,10 +67,14 @@ class StreamStorage {
         if (!streamData) {
             return null;
         }
-        
+
+        console.log("Current subscribers:");
         for (let idx in streamData.subscribers) {
             console.log(idx, streamData.subscribers[idx]);
+            console.log("idx: ", idx);
+            console.log("data: ", streamData.subscribers[idx]);
             if (streamData.subscribers[idx].sessionSalt == sessionSalt) {
+                console.log("List of subscribers finished. Salt found!");
                 return {
                     id : idx,
                     salt : streamData.subscribers[idx].streamSalt,
@@ -78,7 +82,8 @@ class StreamStorage {
                 }
             }
         }
-        
+        console.log("List of subscribers finished, required salt not found: "+sessionSalt);
+
         return null;
         
     }
@@ -131,7 +136,7 @@ class StreamStorage {
         if (streamIdx < 0) {
             return false;
         }
-        
+
         let criterion = (options.wowzaSession) ? options.wowzaSession : options.userSalt;
         for (let idx in this.streams[streamIdx].subscribers) {
             let subscriber = this.streams[streamIdx].subscribers[idx];
