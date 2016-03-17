@@ -14,7 +14,7 @@ class NameGenerator {
     }
 
     generateSalt () {
-        return '' + Math.random() * (this.saltMax - this.saltMin) + this.saltMin;
+        return '' + Math.round(Math.random() * (this.saltMax - this.saltMin) + this.saltMin);
     }
 
     generateName () {

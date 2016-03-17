@@ -1,25 +1,26 @@
 "use strict";
 
+const Promise       = require('bluebird');
 const config        = require('../config.json');
 const log           = require('./logger');
-const cp            = require('child_process');
+const nameGenerator = require('./name-generator')();
+const cpExecAsync   = Promise.promisify(require('child_process').exec);
 
 class SnapshotCache {
 
-    constructor (targetStreamsSource) {
-        if (!targetStreamsSource) {
-            throw Error('SnapshotCache: constructor: targetStreamsSource parameter nust pe specified');
+    constructor (activeStreamManager) {
+        if (!activeStreamManager) {
+            throw Error('SnapshotCache: constructor: activeStreamManager parameter must pe specified');
         }
         this.enabled = false;
         this.snapshotInterval = config.timings['snapshotLifetime-Sec'] * 1000;
-        this.targetStreamsSource = targetStreamsSource;
+        this.activeStreamManager = activeStreamManager;
         log.info('StapshotCache initialized');
-        log.info(this.targetStreamsSource);
     }
 
     start () {
         setInterval(
-            this.cacheSourceStreams,
+            this.cacheSourceStreams.bind(this),
             this.snapshotInterval
         );
         log.info(`StapshotCache is starting with interval: ${this.snapshotInterval}`);
@@ -27,39 +28,49 @@ class SnapshotCache {
 
     cacheSourceStreams () {
         log.info('StapshotCache: caching called');
-        let streams = this.targetStreamsSource().data;
-        for (let idx in streams) {
-            cacheSingleStream(streams[idx].name);
+        let streams = this.activeStreamManager.getActiveStreams().streams;
+        log.info(`StapshotCache: Initialising caching of ${streams.length} streams`);
+        for (let idx = 0; idx < streams.length; idx++) {
+            log.info(`StapshotCache: caching ${streams[idx].name}`);
+            this.cacheSingleStream(streams[idx].name);
         }
     }
 
     cacheSingleStream (streamName) {
-        let command = `scrot '${streamName}.png' -e 'mv $f ~/Desktop/'`;
-        Promise.resolve(cp.exec(command))
-            .then(() => {
+
+        let streamUrl    = `${config.streamUrl}/${streamName}`;
+        let salt         = nameGenerator.generateSalt();
+        let snapshotFile = `${config.snapshotPath}/${streamName}.png`;
+        let command      = `ffmpeg -y -i ${streamUrl} -vframes 1 ${snapshotFile}`;
+
+        this.activeStreamManager.subscribe(streamName, salt);
+        Promise.resolve(cpExecAsync(command))
+            .then((param) => {
+                console.log(param);
                 log.info(`StapshotCache: ${streamName} is cached`);
             })
             .catch((e) => {
                 log.error(`Error occured while catching stream: ${e} Stacktrace: ${e.stack}`);
             });
+
     }
 
 }
 
 // TESTING COURT
 
-// const StreamStorage = require('./stream-storage');
-// const ActiveStreamManager = require('./active-stream-manager');
+const StreamStorage = require('./stream-storage');
+const ActiveStreamManager = require('./active-stream-manager');
 
-// let storage = new StreamStorage();
-// let streamData1 = {
-//  streamName  : "name1",
-//  streamSalt  : "salt1"   
-// };
-// let streamData2 = {
-//  streamName  : "name2",
-//  streamSalt  : "salt2"   
-// };
+let storage = new StreamStorage();
+let streamData1 = {
+ streamName  : "name1",
+ streamSalt  : "salt1"   
+};
+let streamData2 = {
+ streamName  : "name2",
+ streamSalt  : "salt2"   
+};
 
 // storage.addStream(streamData1);
 // storage.addStream(streamData2);
@@ -70,9 +81,12 @@ class SnapshotCache {
 // storage.subscribeUser('name2', 'session4', 'salt21');
 // storage.subscribeUser('name3', 'session5', 'salt31');
 // console.log(JSON.stringify(storage));
-// storage.unsubscribeUser('name1', 'session2');
+// // storage.unsubscribeUser('name1', 'session2');
 // console.log(JSON.stringify(storage.getStreamData('name1')));
 
-//let manager = new ActiveStreamManager(storage);
-//let cacher = new SnapshotCache(manager.getActiveStreams);
-//cacher.start();
+let manager = new ActiveStreamManager(storage);
+manager.publish('name1', 'session1');
+manager.confirmStream('name1_session1');
+
+let cacher = new SnapshotCache(manager);
+cacher.start();
