@@ -14,6 +14,10 @@ const activeStreamManager = new ActiveStreamManager(storage);
 const Router = require('./modules/router');
 const router = new Router(activeStreamManager, storage);
 
+const SnapshotMaker = require('./modules/snapshot-cache.js');
+const snapshotMaker = new SnapshotMaker(activeStreamManager);
+snapshotMaker.start();
+
 const log = require('./modules/logger');
 
 const app = express();

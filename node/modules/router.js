@@ -64,10 +64,13 @@ class Router {
     getSnapshot (req, res) {
         log.info("Snapshot request");
         var shortStreamName = req.query.id;
-        var currentSnapshot = snapshot.getSnapshot(shortStreamName);
-        // TODO
-        //this.sendResponse(res, 200, {data: currentSnapshot});
-        //log.info("Snapshot sent");
+        let snapshotFile = `${config.snapshotPath}/${shortStreamName}.png`;
+        try {
+            res.sendfile(snapshotFile);
+            log.info("Snapshot sent");
+        } catch (err) {
+            log.info("Snapshot don't sent, error", err);
+        }
     }
 
     canPublish (req, res) {

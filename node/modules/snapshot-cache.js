@@ -3,7 +3,8 @@
 const Promise       = require('bluebird');
 const config        = require('../config.json');
 const log           = require('./logger');
-const nameGenerator = require('./name-generator')();
+const NameGenerator = require('./name-generator');
+const nameGenerator = new NameGenerator();
 const cpExecAsync   = Promise.promisify(require('child_process').exec);
 
 class SnapshotCache {
@@ -57,8 +58,10 @@ class SnapshotCache {
 
 }
 
-// TESTING COURT
+module.exports = SnapshotCache;
 
+// TESTING COURT
+/*
 const StreamStorage = require('./stream-storage');
 const ActiveStreamManager = require('./active-stream-manager');
 
@@ -90,3 +93,4 @@ manager.confirmStream('name1_session1');
 
 let cacher = new SnapshotCache(manager);
 cacher.start();
+*/
