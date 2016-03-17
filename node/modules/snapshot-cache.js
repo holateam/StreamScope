@@ -38,14 +38,14 @@ class SnapshotCache {
 
     cacheSingleStream (streamName) {
 
-        let streamUrl    = `${config.streamUrl}/${streamName}`;
         let salt         = nameGenerator.generateSalt();
+        let streamUrl    = `${config.streamUrl}/${streamName}_${salt}`;
         let snapshotFile = `${config.snapshotPath}/${streamName}.png`;
         let command      = `ffmpeg -y -i ${streamUrl} -vframes 1 ${snapshotFile}`;
 
         this.activeStreamManager.subscribe(streamName, salt);
         Promise.resolve(cpExecAsync(command))
-            .then((param) => {
+            .then((param) => {               
                 console.log(param);
                 log.info(`StapshotCache: ${streamName} is cached`);
             })
