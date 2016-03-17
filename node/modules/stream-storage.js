@@ -69,7 +69,7 @@ class StreamStorage {
         }
         
         for (let idx in streamData.subscribers) {
-            console.log(idx, streamData.subscribers[idx]);
+            // console.log(idx, streamData.subscribers[idx]);
             if (streamData.subscribers[idx].sessionSalt == sessionSalt) {
                 return {
                     id : idx,
@@ -192,12 +192,18 @@ module.exports = StreamStorage;
 
 // storage.addStream(streamData1);
 // storage.addStream(streamData2);
-// console.log(JSON.stringify(storage));
-// storage.subscribeUser('name1', 'session1');
-// storage.subscribeUser('name1', 'session2');
-// storage.subscribeUser('name1', 'session3');
-// storage.subscribeUser('name2', 'session4');
-// storage.subscribeUser('name3', 'session5');
-// console.log(JSON.stringify(storage));
-// storage.unsubscribeUser('name1', 'session2');
-// console.log(JSON.stringify(storage.getSubscriberData('name1', 'session3')));
+// storage.confirmStream("name1");
+// storage.confirmStream("name2");
+// console.log("--------\n",JSON.stringify(storage),"--------\n");
+// // storage.subscribeUser('name1', 'salt1');
+// storage.subscribeUser('name1', 'salt2');
+// // storage.subscribeUser('name1', 'salt3');
+// // storage.subscribeUser('name2', 'salt4');
+// // storage.confirmSubscription('name1', 'salt1', 'sess1');
+// storage.confirmSubscription('name1', 'salt2', 'sess2');
+// // storage.confirmSubscription('name1', 'salt3', 'sess3');
+// // storage.confirmSubscription('name2', 'salt4', 'sess4');
+// console.log("--------\n",JSON.stringify(storage),"--------\n");
+// storage.unsubscribeUser({streamName: 'name1', wowzaSession: 'sess2'});
+// console.log("--------\n",JSON.stringify(storage),"--------\n");
+
