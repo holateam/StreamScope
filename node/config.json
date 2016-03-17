@@ -1,6 +1,6 @@
 {
     "scopeServer"     : "server.com",
-    "scopePort"       : 1111,
+    "scopePort"       : 10030,
     "wowzaServer"     : "wserver.com",
     "wowzaPort"       : 1112,
     "ranges"  : {

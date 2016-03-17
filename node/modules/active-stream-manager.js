@@ -107,7 +107,7 @@ class ActiveStreamManager {
             if (this.activeStreams[stream.streamName].confirm) {
                 let duration = (stream.duration) ? stream.duration : -1;
                 let liveTime = (stream.publishTime) ? ((new Date()).getTime() - stream.publishTime)/1000 : -1;
-                activeStreamList.push({name: this.activeStreams[stream.streamName].fullName, duration: duration, liveTime: liveTime});
+                activeStreamList.push({name: stream.streamName, duration: duration, liveTime: liveTime});
             }
         }
         return {streams: activeStreamList};
