@@ -1,6 +1,6 @@
 "use strict";
 
-const config = require('../config.json');
+const config = require('../../config.json');
 const log = require('./logger');
 
 class Rejecter {
@@ -18,7 +18,7 @@ class Rejecter {
     
     playAllowed (streamName) {
         let streamData = this.storage.getStreamData(streamName);
-        return streamData.subscribers.length < this.subscribersSlots;
+        return (streamData) ? streamData.subscribers.length < this.subscribersSlotsx : false;
     }
     
     canPublish (saltedStreamName, wowzaSession) {
@@ -31,7 +31,7 @@ class Rejecter {
         let request = this.splitSaltedName(saltedStreamName);
         
         let subscriberData = this.storage.getSubscriberData(request.name, request.salt);
-        if (subscriberData.wowzaSession) {
+        if (!subscriberData || subscriberData.wowzaSession) {
             return false;
         }
         
@@ -46,5 +46,3 @@ class Rejecter {
         }
     }
 }
-
-module.exports = Rejecter;
