@@ -66,7 +66,7 @@ class Router {
         var shortStreamName = req.query.id;
         let snapshotFile = `${config.snapshotPath}/${shortStreamName}.png`;
         try {
-            res.sendFile(snapshotFile);
+            res.sendfile(snapshotFile);
             log.info("Snapshot sent");
         } catch (err) {
             log.info("Snapshot don't sent, error", err);
@@ -97,7 +97,9 @@ class Router {
         if (this.rejecter.canPlay(streamName, sessionId)){
             allowed = true;
             log.info("canPlay allowed");
-            this.activeStreamManager.confirmSubscription(streamName, sessionId);
+            if (streamName!=this.activeStreamManager.lastSnapshotStreamName){
+                this.activeStreamManager.confirmSubscription(streamName, sessionId);
+            }
         } else {
             log.info("canPlay rejected");
         }
@@ -106,6 +108,7 @@ class Router {
 
     stopPlay (req, res) {
         log.info("stopPlay request", req.originalUrl);
+        log.info("data: ", {streamName: req.query.streamName, wowzaSession: req.query.sessionId});
         this.activeStreamManager.unsubscribeUser({
             streamName: req.query.streamName, wowzaSession: req.query.sessionId
         });
