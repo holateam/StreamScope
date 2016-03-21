@@ -1,7 +1,8 @@
 "use strict";
 
-const config = require('../config.json');
-const log = require('./logger');
+const config        = require('../config.json');
+const StreamStorage = require('./stream-storage');
+const log           = require('./logger');
 
 class Rejecter {
 
@@ -13,18 +14,18 @@ class Rejecter {
     }
 
     publishAllowed () {
-        return this.storage.getStreamsAmount() < this.publishingSlots;
+        return (this.storage) ? (this.storage.getStreamsAmount() < this.publishingSlots) : false;
     }
     
     playAllowed (streamName) {
         let streamData = this.storage.getStreamData(streamName);
-        return (streamData) ? streamData.subscribers.length < this.subscribersSlotsx : false;
+        return (streamData) ? (streamData.subscribers.length < this.subscribersSlots) : false;
     }
     
     canPublish (saltedStreamName, wowzaSession) {
         let request = this.splitSaltedName(saltedStreamName);
         let streamData = this.storage.getStreamData(request.name);
-        return streamData.streamSalt == request.salt;
+        return (streamData) ? (streamData.streamSalt == request.salt) : false;
     }
 
     canPlay (saltedStreamName, wowzaSession) {
@@ -39,16 +40,24 @@ class Rejecter {
     }
 
     splitSaltedName (saltedName) {
-        let slises = saltedName.split('_',2);
+        let slises = saltedName.split('_', 2);
         return {
             name : slises[0],
             salt : slises[1]
         }
     }
 }
-<<<<<<< HEAD
 module.exports = Rejecter;
-=======
 
-module.exports = Rejecter;
->>>>>>> bcf8ea17c0cd01ea34cd0c154edf6f821df26801
+
+// TESTING COURT
+// let storage = new StreamStorage();
+// let streamData1 = {
+//     streamName  : "name1",
+//     streamSalt  : "salt1"   
+// };
+// storage.addStream(streamData1);
+
+// let rejecter = new Rejecter(storage);
+// console.log(rejecter.publishAllowed());
+// console.log(rejecter.playAllowed('name1'));

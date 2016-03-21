@@ -12,7 +12,7 @@ class StreamStorage {
 
     constructor () {
         this.streams = [];
-        log.info('StreamStorage is initi');
+        log.info('StreamStorage is initiated');
     }
 
     addStream (streamData) {
