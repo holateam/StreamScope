@@ -1,9 +1,9 @@
 "use strict";
-let request = require('request');
-let NameGenerator = require('./name-generator');
+let sendRequest = require('./send-request.js');
 const config = require('../config.json');
-let nameGenerator = new NameGenerator();
 const log = require('./logger');
+let NameGenerator = require('./name-generator');
+let nameGenerator = new NameGenerator();
 
 class ActiveStreamManager {
     constructor(storage) {
@@ -27,9 +27,9 @@ class ActiveStreamManager {
         return {streamUrl: this.streamUrl, streamName: fullName};
     }
 
-    confirmStream(fullName) {
+    confirmStream(fullName, duration) {
         let streamName = this.splitPartFullName(fullName, 0);
-        if (this.storage.confirmStream(streamName)) {
+        if (this.storage.confirmStream(streamName, duration)) {
             this.activeStreams[streamName].confirm = true;
             log.info(`Confirm publish: ${fullName}`);
         } else {
@@ -82,11 +82,20 @@ class ActiveStreamManager {
         }
     }
 
-   /* getActiveStreams() {
-        request.get(this.wowzaUrl)
-            .on('response', this.upDateStorage(data.streams))
-            .on('error', this.reportError);
-    }*/
+    getActiveStreams() {
+        return Promise.resolve(sendRequest(this.wowzaUrl))
+            .then((response)=> {
+                if (response.statusCode == 200) {
+                    let body = JSON.parse(response.body);
+                    return this.upDateStorage(body.data.streams);
+                } else {
+                    return this.reportError(`statusCode: ${response.statusCode}`, response.statusCode, response.statusMessage);
+                }
+            })
+            .catch((error)=> {
+                return this.reportError(error);
+            });
+    }
 
     splitPartFullName (fullName, idx) {
         let slices = fullName.split('_' , 2);
@@ -106,27 +115,28 @@ class ActiveStreamManager {
     }
 
 
-    /*upDateStorage(streams) {
-        let streamsList = [];
+    upDateStorage(streams) {
+        let streamList = [];
         streams.forEach((stream)=> {
-            let streamName = this.splitPartFullName(stream.streamName, 0);
-            let streamSalt = this.splitPartFullName(stream.streamName, 1);
-            this.publish(streamName, streamSalt);
-            this.confirmStream(stream.streamName);
-            stream.viewers.forEach((user)=> {
-                this.subscribeUser(streamName);
-                this.confirmSubscription(user.fullStreamName, user.sessionId);
+            let streamSalt = this.splitPartFullName(stream.id, 1);
+            this.publish(stream.streamName, streamSalt);
+            this.confirmStream(stream.id, stream.durationSec);
+            stream.connections.forEach((user)=> {
+                this.subscribeUser(stream.streamName, user.sessionId);
+                this.confirmSubscription(`${stream.streamName}_${user.sessionId}`, user.ip);
             });
-            streamsList.push({name: stream.streamName, duration: stream.durationSec, liveTime: -1});
+            streamList.push({name: stream.streamName, duration: stream.durationSec, liveTime: -1});
         });
-        log.info(`Return active streams list: ${streamsList};`);
-        return {data: {streams: streamsList}};
+        log.info(`Return active streams list: ${streamList};`);
+        return {data: {streams: streamList}};
     }
 
-    reportError() {
-        log.error(`Can not get information about active streams from ${this.wowzaUrl}`);
+    reportError(error, statusCode, statusMessage) {
+        statusCode = statusCode || 404;
+        let msg = statusMessage || error;
+        log.error(`On request on ${this.wowzaUrl} get ${error}`);
+        return { error: { code: statusCode, message: msg }, version: config.version };
     }
-*/
 }
 
 module.exports = ActiveStreamManager;

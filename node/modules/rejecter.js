@@ -1,6 +1,6 @@
 "use strict";
 
-const config = require('../../config.json');
+const config = require('../config.json');
 const log = require('./logger');
 
 class Rejecter {
@@ -46,4 +46,9 @@ class Rejecter {
         }
     }
 }
+<<<<<<< HEAD
 module.exports = Rejecter;
+=======
+
+module.exports = Rejecter;
+>>>>>>> bcf8ea17c0cd01ea34cd0c154edf6f821df26801
