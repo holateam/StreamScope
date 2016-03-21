@@ -46,3 +46,4 @@ class Rejecter {
         }
     }
 }
+module.exports = Rejecter;
