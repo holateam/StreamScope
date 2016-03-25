@@ -22,6 +22,10 @@ const log = require('./modules/logger');
 
 const app = express();
 
+app.get ('/streamyscopeapi/ping', function(req, res) {
+    res.sendStatus(200);
+});
+
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
