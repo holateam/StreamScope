@@ -1,5 +1,6 @@
 "use strict";
 const config = require('../config.json');
+const existenceCheck = require('./file-existence-check.js');
 
 const NameGenerator = require('./name-generator');
 const nameGenerator = new NameGenerator();
@@ -65,12 +66,14 @@ class Router {
         log.info("Snapshot request");
         var shortStreamName = req.query.id;
         let snapshotFile = `${config.snapshotPath}/${shortStreamName}.png`;
-        try {
-            res.sendfile(snapshotFile);
-            log.info("Snapshot sent");
-        } catch (err) {
-            log.info("Snapshot don't sent, error", err);
-        }
+        Promise.resolve(this.snapshotExistenceCheck(snapshotFile))
+            .then(()=> {
+                res.sendfile(snapshotFile);
+                log.info("Snapshot sent");
+            })
+            .catch((error)=>{
+                log.info("Snapshot don't sent, error: ", error);
+            });
     }
 
     canPublish (req, res) {
@@ -119,6 +122,17 @@ class Router {
         var streamName = req.query.streamName;
         //var sessionId = req.query.sessionid;
         this.activeStreamManager.unpublish(streamName);
+    }
+
+    snapshotExistenceCheck(snapshot) {
+        return Promise.resolve(existenceCheck(snapshot))
+            .then(()=> {
+                return true;
+            })
+            .catch((error)=>{
+                log.error('snapshot existence check returned: ', error);
+                return error;
+            });
     }
 
 }
