@@ -123,12 +123,14 @@ class ActiveStreamManager {
     removeUnconfirmedPublish (streamName) {
         if (streamName in this.activeStreams && !this.activeStreams[streamName].confirm){
             this.unpublish(streamName);
+            log.info(`Stream-manager: direct to unpublish unconfirmed publish`);
         }
     }
 
     removeUnconfirmedUser (streamName, userSalt) {
         if (streamName in this.activeUsers && !this.activeUsers[streamName].confirm) {
             this.unsubscribeUser({streamName: streamName, userSalt: userSalt});
+            log.info(`Stream-manager: direct to unsubscribeUser unconfirmed user`);
         }
     }
 
