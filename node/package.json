@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "description": "api for stream validation",
   "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -16,5 +12,9 @@
     "fs": "0.0.2",
     "request": "^2.69.0",
     "winston": "^2.2.0"
+  },
+  "scripts": {
+    "test": "mocha --recursive tests/",
+    "start": "node server.js"
   }
 }

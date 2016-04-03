@@ -1,11 +1,19 @@
 "use strict";
 
-const config        = require('../config.json');
-const log           = require('./logger');
+const systemConfig  = require('../config.json');
+// const log           = require('./logger');
+const log = { info: function(){} };
 
 class Rejecter {
 
-    constructor (storage) {
+    constructor (storage, config) {
+        if (!storage) {
+            throw Error('StreamStorage must be passed as a parameter');
+        } 
+        if (!storage.streams) {
+            throw Error('invalid StreamStorage passed as a parameter');
+        }
+        config = config || systemConfig;
         this.storage            = storage;
         this.publishingSlots    = config.quotes["publishing-N"];
         this.subscribersSlots   = config.quotes["streaming-N"];
@@ -29,7 +37,6 @@ class Rejecter {
 
     canPlay (saltedStreamName) {
         let request = this.splitSaltedName(saltedStreamName);
-        console.log("request: ", request);
         let subscriberData = this.storage.getSubscriberData(request.name, request.salt);
         if (!subscriberData || subscriberData.wowzaSession) {
             return false;

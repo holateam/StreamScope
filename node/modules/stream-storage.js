@@ -6,7 +6,8 @@ Array.prototype.fastRemove = function(idx) {
     this.pop();
 }
 
-const log = require('./logger');
+// const log = require('./logger');
+const log = { info: function(){} };
 
 class StreamStorage {
 
@@ -18,8 +19,10 @@ class StreamStorage {
     addStream (streamData) {
 
         if (!streamData.streamName) {
+            log.error('streamData.streamName option must be defined. Aborting.');
             throw Error('streamData.streamName option must be defined. Aborting.');
         } else if (!streamData.streamSalt) {
+            log.error('streamData.streamSalt option must be defined. Aborting.');
             throw Error('streamData.streamSalt option must be defined. Aborting.');
         }
         
@@ -68,21 +71,21 @@ class StreamStorage {
             return null;
         }
 
-        console.log("Current subscribers:");
+        // console.log("Current subscribers:");
         for (let idx in streamData.subscribers) {
-            console.log(idx, streamData.subscribers[idx]);
-            console.log("idx: ", idx);
-            console.log("data: ", streamData.subscribers[idx]);
+            // console.log(idx, streamData.subscribers[idx]);
+            // console.log("idx: ", idx);
+            // console.log("data: ", streamData.subscribers[idx]);
             if (streamData.subscribers[idx].sessionSalt == sessionSalt) {
-                console.log("List of subscribers finished. Salt found!");
+                // console.log("List of subscribers finished. Salt found!");
                 return {
                     id : idx,
                     salt : streamData.subscribers[idx].streamSalt,
-                    wowzaId : streamData.subscribers[idx].wowzaId
+                    wowzaSession : streamData.subscribers[idx].wowzaSession
                 }
             }
         }
-        console.log("List of subscribers finished, required salt not found: "+sessionSalt);
+        // console.log("List of subscribers finished, required salt not found: "+sessionSalt);
 
         return null;
         
@@ -135,19 +138,19 @@ class StreamStorage {
         let streamIdx = this.findStream(options.streamName);
 
         if (streamIdx < 0) {
-            console.log("unsubscribeUser: stream not found", options.streamName);
+            // console.log("unsubscribeUser: stream not found", options.streamName);
             return false;
         }
 
         let criterion = (options.wowzaSession) ? options.wowzaSession : options.userSalt;
-        console.log("unsubscribe criterion", criterion);
+        // console.log("unsubscribe criterion", criterion);
         for (let idx in this.streams[streamIdx].subscribers) {
             let subscriber = this.streams[streamIdx].subscribers[idx];
             let currentValue = (options.wowzaSession) ? subscriber.wowzaSession : subscriber.userSalt;
-            console.log("unsubscribe currentValue", currentValue);
+            // console.log("unsubscribe currentValue", currentValue);
             if (criterion == currentValue) {
                 this.streams[streamIdx].subscribers.fastRemove(idx);
-                console.log("unsubscribe found!");
+                // console.log("unsubscribe found!");
                 return true;
             }
         }
