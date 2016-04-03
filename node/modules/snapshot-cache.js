@@ -42,7 +42,7 @@ class SnapshotCache {
         let salt         = nameGenerator.generateSalt();
         let streamUrl    = `${config.streamUrl}/${streamName}_${salt}`;
         let snapshotFile = `${config.snapshotPath}/${streamName}.png`;
-        let command      = `ffmpeg -y -i ${streamUrl} -vframes 1 ${snapshotFile}`;
+        let command      = `ffmpeg -an -y -i ${streamUrl} -vframes 1 ${snapshotFile} -timeout=5`;
 
         this.activeStreamManager.subscribe(streamName, salt);
         Promise.resolve(cpExecAsync(command))
