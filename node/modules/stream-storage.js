@@ -133,16 +133,21 @@ class StreamStorage {
         }
         
         let streamIdx = this.findStream(options.streamName);
+
         if (streamIdx < 0) {
+            console.log("unsubscribeUser: stream not found", options.streamName);
             return false;
         }
 
         let criterion = (options.wowzaSession) ? options.wowzaSession : options.userSalt;
+        console.log("unsubscribe criterion", criterion);
         for (let idx in this.streams[streamIdx].subscribers) {
             let subscriber = this.streams[streamIdx].subscribers[idx];
             let currentValue = (options.wowzaSession) ? subscriber.wowzaSession : subscriber.userSalt;
+            console.log("unsubscribe currentValue", currentValue);
             if (criterion == currentValue) {
                 this.streams[streamIdx].subscribers.fastRemove(idx);
+                console.log("unsubscribe found!");
                 return true;
             }
         }
@@ -173,11 +178,17 @@ class StreamStorage {
     }
 
     findStream(streamName) {
-        for (let idx in this.streams) {
-            if (this.streams[idx].streamName == streamName) {
-                return idx;
+        //for (let idx in this.streams) {
+        //    if (this.streams[idx].streamName == streamName) {
+        //        return idx;
+        //    }
+        //}
+        for(var i=0; i<this.streams.length; i++){
+            if (streamName.indexOf(this.streams[i].streamName)>-1){
+                return i;
             }
         }
+
         return -1;
     }
 

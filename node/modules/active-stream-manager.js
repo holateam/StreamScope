@@ -62,6 +62,8 @@ class ActiveStreamManager {
         } else if (streamName in this.activeStreams) {
             delete this.activeStreams[streamName];
             log.info(`Remove publish: ${streamName} from manager`);
+        } else {
+            log.info(`Error. Publish not found. ${streamName} and don't removed from manager`);
         }
     }
 

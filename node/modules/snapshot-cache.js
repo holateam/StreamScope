@@ -45,6 +45,7 @@ class SnapshotCache {
         let command      = `ffmpeg -an -y -i ${streamUrl} -vframes 1 ${snapshotFile} -timeout=5`;
 
         this.activeStreamManager.subscribe(streamName, salt);
+        this.activeStreamManager.lastSnapshotStreamName = streamUrl;
         Promise.resolve(cpExecAsync(command))
             .then((param) => {
                 console.log("Param!", param);

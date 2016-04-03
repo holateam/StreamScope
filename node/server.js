@@ -22,49 +22,41 @@ const log = require('./modules/logger');
 
 const app = express();
 
+app.get ('/streamyscopeapi/ping', function(req, res) {
+    res.sendStatus(200);
+});
+
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
-app.post('/streamscopeapi/v1/stream/publish', function(req, res) {
+app.post('/streamyscopeapi/v1/stream/publish', function(req, res) {
     router.publishRequest (req, res)
 });
 
-app.post('/streamscopeapi/v1/stream/play', function(req, res) {
+app.post('/streamyscopeapi/v1/stream/play', function(req, res) {
     router.playRequest (req, res);
 });
 
-app.get ('/streamscopeapi/v1/streams', function(req, res) {
+app.get ('/streamyscopeapi/v1/streams', function(req, res) {
     router.getStreams (req, res);
 });
 
-app.get ('/streamscopeapi/v1/stream/snapshot', function(req, res) {
+app.get ('/streamyscopeapi/v1/stream/snapshot', function(req, res) {
     router.getSnapshot (req, res);
 });
 
-app.get('/streamscopeapi/v1/user/canPublish', function(req, res) {
-    router.canPublish (req, res);
-});
 app.get('/streamyscopeapi/v1/publishstart', function(req, res) {
     router.canPublish (req, res);
 });
 
-app.get('/streamscopeapi/v1/user/canPlay', function(req, res) {
-    router.canPlay (req, res);
-});
 app.get('/streamyscopeapi/v1/viewerstart', function(req, res) {
     router.canPlay (req, res);
 });
 
-app.get('/streamscopeapi/v1/user/stopPublish', function(req, res) {
-    router.stopPublish (req, res);
-});
 app.get('/streamyscopeapi/v1/publishstop', function(req, res) {
     router.stopPublish (req, res);
 });
 
-app.get('/streamscopeapi/v1/user/stopPlay', function(req, res) {
-    router.stopPlay (req, res);
-});
 app.get('/streamyscopeapi/v1/viewerstop', function(req, res) {
     router.stopPlay (req, res);
 });

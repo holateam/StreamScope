@@ -29,7 +29,7 @@ class Rejecter {
 
     canPlay (saltedStreamName) {
         let request = this.splitSaltedName(saltedStreamName);
-        
+        console.log("request: ", request);
         let subscriberData = this.storage.getSubscriberData(request.name, request.salt);
         if (!subscriberData || subscriberData.wowzaSession) {
             return false;
