@@ -93,7 +93,8 @@ class ActiveStreamManager {
     }
 
     unsubscribeUser(streamData) {
-        let streamName = streamData.streamName;
+        let streamName = splitPartFullName(streamData.streamName, 0);
+        streamData.streamName = streamName;
         if (this.storage.unsubscribeUser(streamData)) {
             delete  this.activeUsers[streamName];
             log.info(`Remove subscribe on stream: ${streamName} for: ${(streamData.wowzaSession) ? streamData.wowzaSession : streamData.userSalt}`);
