@@ -69,11 +69,12 @@ class ActiveStreamManager {
 
     subscribe(streamName, sessionSalt, preveiw) {
         if (this.storage.subscribeUser(streamName, sessionSalt)) {
-            this.activeUsers[streamName] = {salt: sessionSalt, confirm: false};
+            let fullName = `${streamName}_${sessionSalt}`;
+            this.activeUsers[fullName] = {streamName: streamName, sessionSalt: sessionSalt, confirm: false};
             setTimeout(this.removeUnconfirmedUser.bind(this), this.pendingConfirmLifetime, streamName, sessionSalt);
             log.info(`Initialize new subscribe on stream: ${streamName} for: ${sessionSalt}`);
 
-            return (preveiw) ? `preview-${streamName}_${sessionSalt}` : `${streamName}_${sessionSalt}`;
+            return (preveiw) ? `preview-${fullName}` : `${fullName}`;
         } else {
             log.info(`Reject initialize subscribe on unavailable stream: ${streamName}`);
         }
@@ -85,8 +86,12 @@ class ActiveStreamManager {
         let shortName = this.splitPartFullName(streamName, 0);
         let sessionSalt = this.splitPartFullName(streamName, 1);
         if (this.storage.confirmSubscription(shortName, sessionSalt, wowzaSession)) {
-            this.activeUsers[shortName].confirm = true;
-            log.info(`Confirm subscribe on stream: ${shortName} for: ${wowzaSession}`);
+            try {
+                this.activeUsers[streamName].confirm = true;
+                log.info(`Confirm subscribe on stream: ${shortName} for: ${wowzaSession}`);
+            } catch (e) {
+                log.error(`Can not find subscription on stream: ${shortName} with sessionSalt ${sessionSalt}. Catch: ${e}`);
+            }
         } else {
             log.error(`Reject confirm subscription on stream: ${shortName} with sessionSalt ${sessionSalt}`);
         }
@@ -129,9 +134,10 @@ class ActiveStreamManager {
     }
 
     removeUnconfirmedUser (streamName, userSalt) {
-        if (streamName in this.activeUsers && !this.activeUsers[streamName].confirm) {
-            this.unsubscribeUser({streamName: streamName, userSalt: userSalt});
-            log.info(`Stream-manager: direct to unsubscribeUser unconfirmed user`);
+        let fullName = `${streamName}_${sessionSalt}`;
+        if (fullName in this.activeUsers && !this.activeUsers[fullName].confirm) {
+            this.unsubscribeUser({streamName: fullName, userSalt: userSalt});
+            log.info(`Stream-manager: direct to unsubscribeUser unconfirmed user on stream ${streamName} with salt ${userSalt}`);
         }
     }
 
