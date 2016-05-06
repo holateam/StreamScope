@@ -98,7 +98,7 @@ class ActiveStreamManager {
     }
 
     unsubscribeUser(streamData) {
-        let streamName = splitPartFullName(streamData.streamName, 0);
+        let streamName = this.splitPartFullName(streamData.streamName, 0);
         streamData.streamName = streamName;
         if (this.storage.unsubscribeUser(streamData)) {
             delete  this.activeUsers[streamName];
