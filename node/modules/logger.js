@@ -6,7 +6,7 @@ var infoLogger = new logger.Logger({
     },
     transports: [
         new (logger.transports.File)({
-            filename: __dirname + '/../logs/info.log',
+            filename: __dirname+'/../logs/info.log',
             level: 'info',
             json: false,
             formatter: formatter
@@ -23,7 +23,7 @@ var errorLogger = new logger.Logger({
     },
     transports: [
         new (logger.transports.File)({
-            filename: __dirname + '/../logs/error.log',
+            filename: __dirname+'/../logs/error.log',
             level: 'error',
             json: false,
             formatter: formatter
@@ -34,17 +34,17 @@ var errorLogger = new logger.Logger({
     ]
 });
 
-function formatter(options) {
+function formatter(options){
 
-    return new Date().toString() + ' '+ options.level.toUpperCase() +' >>> '+ (undefined !== options.message ? options.message : '') +
-        (options.meta && Object.keys(options.meta).length ? '\n\t'+ JSON.stringify(options.meta, null, 2) : '' );
+    return new Date().toString()+' '+options.level.toUpperCase()+' >>> '+(undefined !== options.message ? options.message : '')+
+        (options.meta && Object.keys(options.meta).length ? '\n\t'+JSON.stringify(options.meta, null, 2) : '' );
 }
 
 module.exports = {
-    error: function () {
+    error: function(){
         errorLogger.error.apply(this, arguments);
     },
-    info: function () {
+    info: function(){
         infoLogger.info.apply(this, arguments);
     }
 };

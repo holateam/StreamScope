@@ -6,36 +6,36 @@ let NameGenerator = require('./name-generator');
 let nameGenerator = new NameGenerator();
 
 class ActiveStreamManager {
-    constructor(storage) {
+    constructor(storage){
         this.storage = storage;
         this.activeStreams = {};
         this.activeUsers = {};
-        this.pendingConfirmLifetime = config.timings["pendingConfirmLifetime-Sec"] * 1000;
+        this.pendingConfirmLifetime = config.timings["pendingConfirmLifetime-Sec"]*1000;
         this.streamUrl = config.streamUrl;
         this.wowzaUrl = config.wowzaUrl;
         log.info(`Active stream manager initialized.`);
         this.initialize();
     }
 
-    initialize() {
+    initialize(){
         Promise.resolve(sendRequest(this.wowzaUrl))
-            .then((response)=> {
-                if (response.statusCode == 200) {
-                    let body = JSON.parse(response.body);
-                    this.upDateStorage(body.data.streams);
-                    log.info(`Response from ${this.wowzaUrl}: ${body}`);
-                } else {
-                    log.error(`On request on ${this.wowzaUrl} get statusCode: ${response.statusCode} statusMessage: ${response.statusMessage}`);
-                }
-            })
-            .catch((error)=> {
-                log.error(`On request on ${this.wowzaUrl} get ${error.toString()}`);
-            });
+        .then((response)=>{
+            if (response.statusCode == 200) {
+                let body = JSON.parse(response.body);
+                this.upDateStorage(body.data.streams);
+                log.info(`Response from ${this.wowzaUrl}: ${body}`);
+            } else {
+                log.error(`On request on ${this.wowzaUrl} get statusCode: ${response.statusCode} statusMessage: ${response.statusMessage}`);
+            }
+        })
+        .catch((error)=>{
+            log.error(`On request on ${this.wowzaUrl} get ${error.toString()}`);
+        });
     }
 
-    publish(streamName, streamSalt, duration) {
+    publish(streamName, streamSalt, duration){
         streamName = streamName || nameGenerator.generateName();
-        streamSalt= streamSalt || nameGenerator.generateSalt();
+        streamSalt = streamSalt || nameGenerator.generateSalt();
         duration = duration || -1;
         let fullName = `${streamName}_${streamSalt}`;
         this.activeStreams[streamName] = {fullName: fullName, confirm: false};
@@ -45,7 +45,7 @@ class ActiveStreamManager {
         return {streamUrl: this.streamUrl, streamName: fullName};
     }
 
-    confirmStream(fullName) {
+    confirmStream(fullName){
         let streamName = this.splitPartFullName(fullName, 0);
         if (this.storage.confirmStream(streamName)) {
             this.activeStreams[streamName].confirm = true;
@@ -55,7 +55,7 @@ class ActiveStreamManager {
         }
     }
 
-    unpublish(streamName) {
+    unpublish(streamName){
         if (this.storage.removeStream(streamName)) {
             delete this.activeStreams[streamName];
             log.info(`Remove publish: ${streamName} from storage`);
@@ -67,7 +67,7 @@ class ActiveStreamManager {
         }
     }
 
-    subscribe(streamName, sessionSalt, preveiw) {
+    subscribe(streamName, sessionSalt, preveiw){
         if (this.storage.subscribeUser(streamName, sessionSalt)) {
             let fullName = `${streamName}_${sessionSalt}`;
             this.activeUsers[fullName] = {streamName: streamName, sessionSalt: sessionSalt, confirm: false};
@@ -80,16 +80,16 @@ class ActiveStreamManager {
         }
     }
 
-    confirmSubscription(streamName, wowzaSession) {
+    confirmSubscription(streamName, wowzaSession){
         let pos = streamName.lastIndexOf('-');
-        streamName = (pos >= 0) ? streamName.substr(pos + 1) : streamName;
+        streamName = (pos >= 0) ? streamName.substr(pos+1) : streamName;
         let shortName = this.splitPartFullName(streamName, 0);
         let sessionSalt = this.splitPartFullName(streamName, 1);
         if (this.storage.confirmSubscription(shortName, sessionSalt, wowzaSession)) {
             try {
                 this.activeUsers[streamName].confirm = true;
                 log.info(`Confirm subscribe on stream: ${shortName} for: ${wowzaSession}`);
-            } catch (e) {
+            } catch(e) {
                 log.error(`Can not find subscription on stream: ${shortName} with sessionSalt ${sessionSalt}. Catch: ${e}`);
             }
         } else {
@@ -97,7 +97,7 @@ class ActiveStreamManager {
         }
     }
 
-    unsubscribeUser(streamData) {
+    unsubscribeUser(streamData){
         let streamName = this.splitPartFullName(streamData.streamName, 0);
         streamData.streamName = streamName;
         if (this.storage.unsubscribeUser(streamData)) {
@@ -108,32 +108,32 @@ class ActiveStreamManager {
         }
     }
 
-    getActiveStreams() {
+    getActiveStreams(){
         let activeStreamList = [];
         let streamList = this.storage.getAllStreams();
         for (let stream of streamList) {
             if (this.activeStreams[stream.streamName].confirm) {
                 let duration = (stream.duration) ? stream.duration : -1;
-                let liveTime = (stream.publishTime) ? ((new Date()).getTime() - stream.publishTime)/1000 : -1;
+                let liveTime = (stream.publishTime) ? ((new Date()).getTime()-stream.publishTime)/1000 : -1;
                 activeStreamList.push({name: stream.streamName, duration: duration, liveTime: liveTime});
             }
         }
         return {streams: activeStreamList};
     }
 
-    splitPartFullName (fullName, idx) {
-        let slices = fullName.split('_' , 2);
+    splitPartFullName(fullName, idx){
+        let slices = fullName.split('_', 2);
         return slices[idx];
     }
 
-    removeUnconfirmedPublish (streamName) {
-        if (streamName in this.activeStreams && !this.activeStreams[streamName].confirm){
+    removeUnconfirmedPublish(streamName){
+        if (streamName in this.activeStreams && !this.activeStreams[streamName].confirm) {
             this.unpublish(streamName);
             log.info(`Stream-manager: direct to unpublish unconfirmed publish`);
         }
     }
 
-    removeUnconfirmedUser (streamName, userSalt) {
+    removeUnconfirmedUser(streamName, userSalt){
         let fullName = `${streamName}_${sessionSalt}`;
         if (fullName in this.activeUsers && !this.activeUsers[fullName].confirm) {
             this.unsubscribeUser({streamName: fullName, userSalt: userSalt});
@@ -142,12 +142,12 @@ class ActiveStreamManager {
     }
 
 
-    upDateStorage(streams) {
-        streams.forEach((stream)=> {
+    upDateStorage(streams){
+        streams.forEach((stream)=>{
             let streamSalt = this.splitPartFullName(stream.id, 1);
             this.publish(stream.streamName, streamSalt);
             this.confirmStream(stream.id, stream.durationSec);
-            stream.connections.forEach((user)=> {
+            stream.connections.forEach((user)=>{
                 this.subscribeUser(stream.streamName, user.sessionId);
                 this.confirmSubscription(`${stream.streamName}_${user.sessionId}`, user.ip);
             });
